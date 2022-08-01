@@ -39,4 +39,17 @@ public class ItemBarang {
     {
         return nama;
     }
+    
+    public boolean equals(ItemBarang item)
+    {
+        System.out.println(item.nama);
+        System.out.println(this.nama);
+        if(item.id.equalsIgnoreCase(this.id) 
+                && item.nama.equalsIgnoreCase(this.nama)){
+            return true;
+        }
+        
+        return false;
+    }
+    
 }

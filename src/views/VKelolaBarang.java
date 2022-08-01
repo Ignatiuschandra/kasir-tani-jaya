@@ -5,6 +5,33 @@
  */
 package views;
 
+import java.awt.Component;
+import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import javax.swing.AbstractAction;
+import javax.swing.AbstractCellEditor;
+import javax.swing.ButtonModel;
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+import models.ItemBarang;
+
 /**
  *
  * @author Chandra
@@ -14,9 +41,12 @@ public class VKelolaBarang extends javax.swing.JFrame {
     /**
      * Creates new form VKasir
      */
-    VKasir vKasir = new VKasir();
-    
+    VKasir vKasir = VKasir.getInstance();
+    private DefaultTableModel model;
+    private String selectedRowId;
+
     public VKelolaBarang() {
+        this.selectedRowId = "0";
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -33,9 +63,122 @@ public class VKelolaBarang extends javax.swing.JFrame {
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(VKelolaBarang.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        
+
         initComponents();
+
         this.setTitle("TANI JAYA - Kelola Barang");
+
+//        table
+        model = new DefaultTableModel();
+        jtBarang.setModel(model);
+        model.addColumn("KODE");
+        model.addColumn("NAMA");
+        model.addColumn("SATUAN");
+        model.addColumn("HARGA MODAL");
+        model.addColumn("HARGA JUAL");
+        model.addColumn("ACTION");
+
+        jtBarang.getColumnModel().getColumn(5).setMinWidth(0);
+        jtBarang.getColumnModel().getColumn(5).setMaxWidth(0);
+        jtBarang.getColumnModel().getColumn(5).setWidth(0);
+//        getData("");
+
+//        set event ke search bar
+        jSearch.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+                    try {
+                        String searchText = (String) jSearch.getText();
+                        searchText = searchText.trim().toLowerCase();
+
+                        System.out.println(searchText);
+                        getData(searchText);
+                    } catch (Exception ex) {
+                        System.out.println("Ex log " + ex.getMessage());
+                    }
+                }
+            }
+        });
+
+//        set event kalau column di select
+        jtBarang.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                //
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                String selectedCellValue = (String) jtBarang.getValueAt(
+                        jtBarang.getSelectedRow(), 5);
+                System.out.println(selectedCellValue);
+
+//                set id selected
+                selectedRowId = selectedCellValue;
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                //
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                //
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                //
+            }
+
+        });
+    }
+
+    public void getData(String keyword) {
+        //menghapus isi table
+        model.getDataVector().removeAllElements();
+        model.fireTableDataChanged();
+
+        try {
+            java.sql.ResultSet rs;
+            java.sql.Connection conn = vKasir.getDBConn();
+            java.sql.PreparedStatement ps = conn.prepareStatement("SELECT "
+                    + "barang.id, kode, nama, satuan, harga_beli, harga_jual, satuan"
+                    + " FROM barang"
+                    + " LEFT JOIN satuan ON satuan.id = barang.satuan_id"
+                    + " WHERE (nama LIKE '%" + keyword + "%' "
+                    + " OR kode LIKE '%" + keyword + "%')"
+                    + " AND deleted_at IS NULL "
+            );
+            rs = ps.executeQuery();
+
+            models.ItemBarang ib;
+
+            while (rs.next()) {
+                Object[] obj = new Object[6];
+                obj[0] = rs.getString("kode");
+                obj[1] = rs.getString("nama");
+                obj[2] = rs.getString("satuan");
+                obj[3] = rs.getString("harga_beli");
+                obj[4] = rs.getString("harga_jual");
+                obj[5] = rs.getString("id");
+
+                model.addRow(obj);
+                System.out.println(rs.getString("nama"));
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "ERROR load data " + e.getMessage());
+        }
     }
 
     /**
@@ -50,10 +193,12 @@ public class VKelolaBarang extends javax.swing.JFrame {
         jPanel2 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
-        jTextField5 = new javax.swing.JTextField();
+        jtBarang = new javax.swing.JTable();
+        jSearch = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
         jButton2 = new javax.swing.JButton();
+        jbEdit = new javax.swing.JButton();
+        jbHapus = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
@@ -73,23 +218,15 @@ public class VKelolaBarang extends javax.swing.JFrame {
 
         jPanel3.setBackground(new java.awt.Color(204, 204, 204));
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        jtBarang.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
             new String [] {
-                "KODE", "NAMA BARANG", "SATUAN", "HARGA", "ACTION"
-            }
-        ) {
-            boolean[] canEdit = new boolean [] {
-                true, false, false, false, false
-            };
 
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
             }
-        });
-        jScrollPane1.setViewportView(jTable1);
+        ));
+        jScrollPane1.setViewportView(jtBarang);
 
         jLabel8.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         jLabel8.setText("Search");
@@ -99,6 +236,32 @@ public class VKelolaBarang extends javax.swing.JFrame {
         jButton2.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jButton2MouseClicked(evt);
+            }
+        });
+
+        jbEdit.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        jbEdit.setText("EDIT");
+        jbEdit.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jbEditMouseClicked(evt);
+            }
+        });
+        jbEdit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbEditActionPerformed(evt);
+            }
+        });
+
+        jbHapus.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        jbHapus.setText("HAPUS");
+        jbHapus.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jbHapusMouseClicked(evt);
+            }
+        });
+        jbHapus.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbHapusActionPerformed(evt);
             }
         });
 
@@ -115,9 +278,13 @@ public class VKelolaBarang extends javax.swing.JFrame {
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jButton2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jbEdit, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jbHapus, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(34, 34, 34)
                         .addComponent(jLabel8)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTextField5, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -125,9 +292,11 @@ public class VKelolaBarang extends javax.swing.JFrame {
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel8)
-                    .addComponent(jButton2))
+                    .addComponent(jButton2)
+                    .addComponent(jbEdit)
+                    .addComponent(jbHapus))
                 .addGap(9, 9, 9)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 377, Short.MAX_VALUE)
                 .addContainerGap())
@@ -162,13 +331,111 @@ public class VKelolaBarang extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jButton2MouseClicked
 
+    private void jbEditMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jbEditMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jbEditMouseClicked
+
+    private void jbEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbEditActionPerformed
+        // TODO add your handling code here:
+        VKelolaBarangForm kelolaBarangForm = vKasir.getKelolaBarangForm();
+        if (!kelolaBarangForm.isVisible()) {
+            kelolaBarangForm.pack();
+            kelolaBarangForm.setLocationRelativeTo(null);
+            kelolaBarangForm.setVisible(true);
+            kelolaBarangForm.setDefaultCloseOperation(VKelolaBarangForm.DISPOSE_ON_CLOSE);
+
+//            set typenya jadi edit mode
+            kelolaBarangForm.setType(2);
+
+//            get data
+            try {
+                java.sql.ResultSet rs;
+                java.sql.Connection conn = vKasir.getDBConn();
+                java.sql.PreparedStatement ps = conn.prepareStatement("SELECT "
+                        + "barang.id, kode, nama, satuan, harga_beli, harga_jual, satuan"
+                        + " FROM barang"
+                        + " LEFT JOIN satuan ON satuan.id = barang.satuan_id"
+                        + " WHERE barang.id = " + this.selectedRowId + " "
+                        + " AND barang.deleted_at IS NULL "
+                );
+                rs = ps.executeQuery();
+
+                while (rs.next()) {
+                    models.ItemBarang ib;
+
+                    kelolaBarangForm.setTfNamaBarang(rs.getString("nama"));
+                    kelolaBarangForm.setTfKode(rs.getString("kode"));
+                    kelolaBarangForm.setTfNamaBarang(rs.getString("nama"));
+                    kelolaBarangForm.setTfHargaBeli(rs.getString("harga_beli"));
+                    kelolaBarangForm.setTfHargaJual(rs.getString("harga_jual"));
+
+//                get item
+                    java.sql.ResultSet iId;
+                    java.sql.PreparedStatement iIdPs = conn.prepareStatement("SELECT "
+                            + "id, satuan"
+                            + " FROM satuan"
+                            + " WHERE satuan = '" + rs.getString("satuan") + "' "
+                    );
+                    iId = iIdPs.executeQuery();
+                    
+                    if (iId.next()) {
+                        ItemBarang item
+                                = new models.ItemBarang(iId.getString(1), 
+                                        iId.getString(2));
+                        
+                        kelolaBarangForm.setCbSatuan(item);
+                    }
+                }
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(null, "ERROR load data " + e.getMessage());
+            }
+        }
+    }//GEN-LAST:event_jbEditActionPerformed
+
+    private void jbHapusMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jbHapusMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jbHapusMouseClicked
+
+    private void jbHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbHapusActionPerformed
+        // TODO add your handling code here:
+        deleteData();
+    }//GEN-LAST:event_jbHapusActionPerformed
+
+//    method delete
+    private void deleteData() {
+        try {
+            String sId = this.selectedRowId;
+            if (sId == "0") {
+                JOptionPane.showMessageDialog(null, "Silahkan pilih data terlebih dahulu!");
+            } else {
+                java.sql.Connection conn = vKasir.getDBConn();
+                java.sql.PreparedStatement ps = conn.prepareStatement("UPDATE "
+                        + " barang"
+                        + " SET deleted_at = NOW()"
+                        + " WHERE id = '" + this.selectedRowId + "' "
+                );
+                ps.executeUpdate();
+
+                jSearch.setText("");
+                getData("");
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "ERROR load data " + e.getMessage());
+        }
+    }
+    
+    public String getSelectedRowId(){
+        return this.selectedRowId;
+    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
-    private javax.swing.JTextField jTextField5;
+    private javax.swing.JTextField jSearch;
+    private javax.swing.JButton jbEdit;
+    private javax.swing.JButton jbHapus;
+    private javax.swing.JTable jtBarang;
     // End of variables declaration//GEN-END:variables
 }

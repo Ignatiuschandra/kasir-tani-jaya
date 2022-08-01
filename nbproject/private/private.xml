@@ -6,7 +6,9 @@
             <file>file:/D:/Project/NetBeansProjects/TJProject/src/views/VKelolaBarang.java</file>
             <file>file:/D:/Project/NetBeansProjects/TJProject/src/views/VKelolaBarangForm.java</file>
             <file>file:/D:/Project/NetBeansProjects/TJProject/src/views/VKasir.java</file>
-            <file>file:/D:/Project/NetBeansProjects/TJProject/src/kasir.java</file>
+            <file>file:/D:/Project/NetBeansProjects/TJProject/src/models/StandardItem.java</file>
+            <file>file:/D:/Project/NetBeansProjects/TJProject/src/models/ItemBarang.java</file>
+            <file>file:/D:/Project/NetBeansProjects/TJProject/src/views/VReportTransaksi.java</file>
         </group>
     </open-files>
 </project-private>
