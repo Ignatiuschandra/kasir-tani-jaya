@@ -5,9 +5,12 @@
  */
 package views;
 
+import controllers.ConfigManagement;
 import controllers.FocusTextField;
 import controllers.MyIntFilter;
 import java.awt.Component;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -59,7 +62,9 @@ public class VKasir extends javax.swing.JFrame {
     static VKelolaBarang vKelolaBarang;
     static VKelolaBarangForm vKelolaBarangForm;
     static VKelolaBarangForm vKelolaBarangFormTambah;
+    static VKelolaHutangForm vKelolaHutangForm;
     static VReportTransaksi vReportTransaksi;
+    static VKelolaHutang vKelolaHutang;
     static Connection conn;
     static Statement stm;
     private Map<String, String> map;
@@ -70,13 +75,22 @@ public class VKasir extends javax.swing.JFrame {
     private static int instantiationCounter = 0;
     private static Locale locale = new Locale("id", "ID");
     private static volatile VKasir instance;
+    private java.net.URL urlImage = ClassLoader
+                    .getSystemResource("main/resources/images/logo.png");
+    private static ConfigManagement conf = new ConfigManagement();
 
     private VKasir() {
         initComponents();
         instantiationCounter++; //singleton counter
         System.out.println("CREATE" + instantiationCounter);
 
-        this.setTitle("TANI JAYA - Kasir");
+        jlAppName.setText(conf.getConfig("APP_NAME"));
+        this.setTitle(conf.getConfig("APP_NAME")+" - Kasir");
+        
+        Toolkit kit = Toolkit.getDefaultToolkit();
+        Image img = kit.createImage(urlImage);
+        setIconImage(img);
+        
         lTotalHarga.setText("Rp. " + totalHarga);
 
         //init combobox
@@ -237,9 +251,21 @@ public class VKasir extends javax.swing.JFrame {
     public VKelolaBarangForm getFormTambah() {
         return vKelolaBarangFormTambah;
     }
+    
+    public VKelolaHutang getKelolaHutang() {
+        return vKelolaHutang;
+    }
+    
+    public VKelolaHutangForm getFormHutang() {
+        return vKelolaHutangForm;
+    }
 
     public Connection getDBConn() {
         return conn;
+    }
+    
+    public java.net.URL getLogo(){
+        return urlImage;
     }
 
     public void removeRow(int currentRow) {
@@ -256,6 +282,10 @@ public class VKasir extends javax.swing.JFrame {
     
     public Locale getAppLocale() {
         return this.locale;
+    }
+    
+    public ConfigManagement getAppConfig() {
+        return this.conf;
     }
 
     public void updateSearch(String keyword) {
@@ -293,7 +323,7 @@ public class VKasir extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
+        jlAppName = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         jPanel4 = new javax.swing.JPanel();
@@ -326,9 +356,9 @@ public class VKasir extends javax.swing.JFrame {
 
         jPanel1.setBackground(new java.awt.Color(0, 0, 0));
 
-        jLabel1.setFont(new java.awt.Font("Tahoma", 1, 48)); // NOI18N
-        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel1.setText("TANI JAYA");
+        jlAppName.setFont(new java.awt.Font("Tahoma", 1, 48)); // NOI18N
+        jlAppName.setForeground(new java.awt.Color(255, 255, 255));
+        jlAppName.setText("APP NAME");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -336,14 +366,14 @@ public class VKasir extends javax.swing.JFrame {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1)
+                .addComponent(jlAppName)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1)
+                .addComponent(jlAppName)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -380,6 +410,11 @@ public class VKasir extends javax.swing.JFrame {
 
         jButton5.setFont(new java.awt.Font("Tahoma", 1, 16)); // NOI18N
         jButton5.setText("KELOLA HUTANG");
+        jButton5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton5ActionPerformed(evt);
+            }
+        });
 
         jButton6.setFont(new java.awt.Font("Tahoma", 1, 16)); // NOI18N
         jButton6.setText("LOG OUT");
@@ -737,6 +772,8 @@ public class VKasir extends javax.swing.JFrame {
             vKelolaBarang.setLocationRelativeTo(null);
             vKelolaBarang.setVisible(true);
             vKelolaBarang.setDefaultCloseOperation(VKelolaBarang.DISPOSE_ON_CLOSE);
+        }else{
+            vKelolaBarang.setVisible(true);
         }
         vKelolaBarang.getData("");
     }//GEN-LAST:event_jButton3MouseClicked
@@ -752,6 +789,8 @@ public class VKasir extends javax.swing.JFrame {
             vReportTransaksi.setLocationRelativeTo(null);
             vReportTransaksi.setVisible(true);
             vReportTransaksi.setDefaultCloseOperation(VReportTransaksi.DISPOSE_ON_CLOSE);
+        }else{
+            vReportTransaksi.setVisible(true);
         }
         try {
             vReportTransaksi.getData("");
@@ -759,6 +798,23 @@ public class VKasir extends javax.swing.JFrame {
             Logger.getLogger(VKasir.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_jButton4ActionPerformed
+
+    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
+        // TODO add your handling code here:
+        if (!vKelolaHutang.isVisible()) {
+            vKelolaHutang.pack();
+            vKelolaHutang.setLocationRelativeTo(null);
+            vKelolaHutang.setVisible(true);
+            vKelolaHutang.setDefaultCloseOperation(VReportTransaksi.DISPOSE_ON_CLOSE);
+        }else{
+            vKelolaHutang.setVisible(true);
+        }
+        try {
+            vKelolaHutang.getData("");
+        } catch (ParseException ex) {
+            Logger.getLogger(VKasir.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_jButton5ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -789,9 +845,9 @@ public class VKasir extends javax.swing.JFrame {
 
         // Connect DB
         try {
-            String url = "jdbc:mysql://localhost:3306/kasir_tani_jaya";
-            String user = "root";
-            String pass = "";
+            String url = "jdbc:mysql://localhost:3306/"+conf.getConfig("DB_NAME");
+            String user = conf.getConfig("DB_USN");
+            String pass = conf.getConfig("DB_PWD");
             Class.forName("com.mysql.cj.jdbc.Driver");
             conn = DriverManager.getConnection(url, user, pass);
             stm = conn.createStatement();
@@ -805,6 +861,8 @@ public class VKasir extends javax.swing.JFrame {
         vKelolaBarangForm = new VKelolaBarangForm(1);
         vKelolaBarangFormTambah = new VKelolaBarangForm(1);
         vReportTransaksi = new VReportTransaksi();
+        vKelolaHutang = new VKelolaHutang();
+        vKelolaHutangForm = new VKelolaHutangForm();
 
 //        System.out.println("how many : "+vKasir.getInstantiationCounter());
 
@@ -842,7 +900,6 @@ public class VKasir extends javax.swing.JFrame {
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton6;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel5;
@@ -856,6 +913,7 @@ public class VKasir extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel jlAppName;
     private javax.swing.JLabel lTotalHarga;
     private javax.swing.JTable tKasir;
     private javax.swing.JTextField tfDiserahkan;

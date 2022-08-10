@@ -6,6 +6,8 @@
 package views;
 
 import java.awt.HeadlessException;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
@@ -31,6 +33,10 @@ public class VKelolaBarangForm extends javax.swing.JFrame {
      * Creates new form VKasir
      */
     public VKelolaBarangForm(int type) {
+        Toolkit kit = Toolkit.getDefaultToolkit();
+        Image img = kit.createImage(vKasir.getLogo());
+        setIconImage(img);
+        
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -51,10 +57,12 @@ public class VKelolaBarangForm extends javax.swing.JFrame {
         initComponents();
         this.tipeForm = type;
         if (type == 1) {
-            this.setTitle("TANI JAYA - Tambah Barang");
+            this.setTitle(vKasir.getAppConfig()
+                .getConfig("APP_NAME")+" - Tambah Barang");
             jbTombol.setText("TAMBAH");
         } else {
-            this.setTitle("TANI JAYA - Edit Barang");
+            this.setTitle(vKasir.getAppConfig()
+                .getConfig("APP_NAME")+" - Edit Barang");
             jbTombol.setText("UPDATE");
         }
 

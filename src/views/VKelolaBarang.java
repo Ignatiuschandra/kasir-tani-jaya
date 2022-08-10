@@ -7,6 +7,8 @@ package views;
 
 import java.awt.Component;
 import java.awt.EventQueue;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -46,6 +48,11 @@ public class VKelolaBarang extends javax.swing.JFrame {
     private String selectedRowId;
 
     public VKelolaBarang() {
+        Toolkit kit = Toolkit.getDefaultToolkit();
+        Image img = kit.createImage(vKasir.getLogo());
+        setIconImage(img);
+        
+        setIconImage(img);
         this.selectedRowId = "0";
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -66,7 +73,8 @@ public class VKelolaBarang extends javax.swing.JFrame {
 
         initComponents();
 
-        this.setTitle("TANI JAYA - Kelola Barang");
+        this.setTitle(vKasir.getAppConfig()
+                .getConfig("APP_NAME")+" - Kelola Barang");
 
 //        table
         model = new DefaultTableModel();
