@@ -5,6 +5,7 @@
  */
 package views;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Image;
@@ -104,6 +105,10 @@ public class VReportTransaksi extends javax.swing.JFrame {
 
         this.setTitle(vKasir.getAppConfig()
                 .getConfig("APP_NAME")+" - Rekap Penjualan");
+        
+        //        set color
+        jPanel2.setBackground(
+                Color.decode(vKasir.getAppConfig().getConfig("APP_MAIN_COLOR")));
 
 //        table
         model = new DefaultTableModel();
@@ -286,7 +291,7 @@ public class VReportTransaksi extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
 
-        jPanel2.setBackground(new java.awt.Color(0, 204, 0));
+        jPanel2.setBackground(new java.awt.Color(255, 255, 255));
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);

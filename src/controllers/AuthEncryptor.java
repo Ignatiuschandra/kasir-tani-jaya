@@ -4,32 +4,42 @@
  */
 package controllers;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Properties;
-import javax.swing.JOptionPane;
+import enc.BCrypt;
 
 /**
  *
  * @author ignas
  */
-public class ConfigManagement {
-   public static Properties prop = new Properties();
-   
-   public String getConfig(String cfgName){
-       String value = "";
-       
-       try {
-           prop.load(new FileInputStream("src/config/config.iccm"));
-       } catch (FileNotFoundException ex) {
-           JOptionPane.showMessageDialog(null, "File konfigurasi tidak ditemukan ~");
-           System.exit(0);
-       } catch (IOException ex) {
-           JOptionPane.showMessageDialog(null, "Tidak bisa membuka file konfigurasi ~");
-           System.exit(0);
-       }
-       value = prop.getProperty(cfgName);
-       return value;
-   }
+public class AuthEncryptor {
+
+    // Define the BCrypt workload to use when generating password hashes. 10-31 is a valid value.
+    private static int workload = 12;
+    private String idLogin;
+
+    public static String hashPassword(String password_plaintext) {
+        String salt = BCrypt.gensalt(workload);
+        String hashed_password = BCrypt.hashpw(password_plaintext, salt);
+
+        return (hashed_password);
+    }
+
+    public static boolean checkPassword(String password_plaintext, String stored_hash) {
+        boolean password_verified = false;
+
+        if (null == stored_hash || !stored_hash.startsWith("$2a$")) {
+            throw new java.lang.IllegalArgumentException("Invalid hash provided for comparison");
+        }
+
+        password_verified = BCrypt.checkpw(password_plaintext, stored_hash);
+
+        return (password_verified);
+    }
+    
+    public void setIdLogin(String idLogin){
+        this.idLogin = idLogin;
+    }
+    
+    public String getIdLogin(){
+        return this.idLogin;
+    }
 }

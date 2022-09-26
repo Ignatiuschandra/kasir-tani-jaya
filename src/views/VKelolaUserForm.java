@@ -5,12 +5,14 @@
  */
 package views;
 
+import java.awt.Color;
 import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,21 +24,22 @@ import models.ItemBarang;
  *
  * @author Chandra
  */
-public class VKelolaBarangForm extends javax.swing.JFrame {
+public class VKelolaUserForm extends javax.swing.JFrame {
 
     VKasir vKasir = VKasir.getInstance();
     private String satuanId;
+    private String userId;
     private int tipeForm;
     private Map<String, String> map;
 
     /**
      * Creates new form VKasir
      */
-    public VKelolaBarangForm(int type) {
+    public VKelolaUserForm(int type) {
         Toolkit kit = Toolkit.getDefaultToolkit();
         Image img = kit.createImage(vKasir.getLogo());
         setIconImage(img);
-        
+
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -55,39 +58,21 @@ public class VKelolaBarangForm extends javax.swing.JFrame {
         }
 
         initComponents();
+        //        set color
+        jPanel2.setBackground(
+                Color.decode(vKasir.getAppConfig().getConfig("APP_MAIN_COLOR")));
+
         this.tipeForm = type;
         if (type == 1) {
             this.setTitle(vKasir.getAppConfig()
-                .getConfig("APP_NAME")+" - Tambah Barang");
+                    .getConfig("APP_NAME") + " - Tambah Barang");
             jbTombol.setText("TAMBAH");
         } else {
             this.setTitle(vKasir.getAppConfig()
-                .getConfig("APP_NAME")+" - Edit Barang");
+                    .getConfig("APP_NAME") + " - Edit Barang");
             jbTombol.setText("UPDATE");
         }
 
-        cbSatuan.removeAllItems(); //digunakan untuk membersihkan item jcombobox sebelum diisi.
-        setCbSatuan();
-    }
-
-    public void setCbSatuan() {
-        try {
-            java.sql.ResultSet rs;
-            java.sql.Connection conn = vKasir.getDBConn();
-            java.sql.PreparedStatement ps = conn.prepareStatement("SELECT id, satuan FROM satuan");
-            rs = ps.executeQuery();
-
-            models.ItemBarang ib;
-
-            while (rs.next()) {
-                ib = new models.ItemBarang(rs.getString(1), rs.getString(2));
-//                itemBarangs.add(ib);
-                System.out.println(rs.getString(1) + " " + rs.getString(2));
-                cbSatuan.addItem(ib);
-            }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "ERROR load satuan " + e.getMessage());
-        }
     }
 
     /**
@@ -102,21 +87,19 @@ public class VKelolaBarangForm extends javax.swing.JFrame {
         jPanel2 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        tfNamaBarang = new javax.swing.JTextField();
+        tfNama = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
-        jlHargaBeli = new javax.swing.JLabel();
-        tfHargaBeli = new javax.swing.JTextField();
         jbTombol = new javax.swing.JButton();
-        tfKode = new javax.swing.JTextField();
+        tfUsername = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
-        cbSatuan = new javax.swing.JComboBox<>();
-        tfHargaJual = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
+        jpfPassword = new javax.swing.JPasswordField();
+        jpfPasswordConfirm = new javax.swing.JPasswordField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
 
-        jPanel2.setBackground(new java.awt.Color(0, 204, 0));
+        jPanel2.setBackground(new java.awt.Color(255, 255, 255));
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -132,17 +115,12 @@ public class VKelolaBarangForm extends javax.swing.JFrame {
         jPanel3.setBackground(new java.awt.Color(204, 204, 204));
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jLabel1.setText("NAMA BARANG");
+        jLabel1.setText("NAMA USER");
 
-        tfNamaBarang.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        tfNama.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
 
         jLabel2.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jLabel2.setText("SATUAN");
-
-        jlHargaBeli.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jlHargaBeli.setText("HARGA MODAL (Rp.)");
-
-        tfHargaBeli.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jLabel2.setText("PASSWORD");
 
         jbTombol.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         jbTombol.setText("TAMBAH");
@@ -152,21 +130,13 @@ public class VKelolaBarangForm extends javax.swing.JFrame {
             }
         });
 
-        tfKode.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        tfUsername.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
 
         jLabel4.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jLabel4.setText("KODE (Optional)");
-
-        cbSatuan.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cbSatuanActionPerformed(evt);
-            }
-        });
-
-        tfHargaJual.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jLabel4.setText("USERNAME");
 
         jLabel5.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jLabel5.setText("HARGA JUAL (Rp.)");
+        jLabel5.setText("PASSWORD USER LOGIN");
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -174,19 +144,20 @@ public class VKelolaBarangForm extends javax.swing.JFrame {
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel1)
-                    .addComponent(tfNamaBarang)
-                    .addComponent(jLabel2)
-                    .addComponent(jlHargaBeli)
-                    .addComponent(tfHargaBeli)
-                    .addComponent(jbTombol, javax.swing.GroupLayout.DEFAULT_SIZE, 255, Short.MAX_VALUE)
-                    .addComponent(jLabel4)
-                    .addComponent(tfKode)
-                    .addComponent(cbSatuan, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel5)
-                    .addComponent(tfHargaJual))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel1)
+                            .addComponent(tfNama)
+                            .addComponent(jLabel2)
+                            .addComponent(jbTombol, javax.swing.GroupLayout.DEFAULT_SIZE, 255, Short.MAX_VALUE)
+                            .addComponent(jLabel4)
+                            .addComponent(tfUsername)
+                            .addComponent(jLabel5))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jpfPassword)
+                    .addComponent(jpfPasswordConfirm))
+                .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -194,29 +165,25 @@ public class VKelolaBarangForm extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(tfNamaBarang, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(tfNama, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(15, 15, 15)
                 .addComponent(jLabel4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(tfKode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(tfUsername, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cbSatuan, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(7, 7, 7)
-                .addComponent(jlHargaBeli)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(tfHargaBeli, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jpfPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(64, 64, 64)
                 .addComponent(jLabel5)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(tfHargaJual, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(5, 5, 5)
+                .addComponent(jpfPasswordConfirm, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jbTombol)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        tfNamaBarang.getAccessibleContext().setAccessibleName("");
+        tfNama.getAccessibleContext().setAccessibleName("");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -241,15 +208,50 @@ public class VKelolaBarangForm extends javax.swing.JFrame {
     private void jbTombolMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jbTombolMouseClicked
         // TODO add your handling code here:
         try {
-            VKelolaBarang vKelolaBarang = vKasir.getKelolaBarang();
+            VKelolaUser vKelolaUser = vKasir.getKelolaUser();
+            String idLogin = vKasir.getAuthEncryptor().getIdLogin();
+
+//            cek password user login dulu
+            String passwd = new String(jpfPasswordConfirm.getPassword());
+            String encryptedPasswd
+                    = vKasir.getAuthEncryptor().hashPassword(passwd);
+
+            String userPassPlain = new String(jpfPassword.getPassword());
+            String userPass = vKasir.getAuthEncryptor().hashPassword(
+                    userPassPlain);
+
+            java.sql.ResultSet rs;
+            java.sql.Connection connCheck = vKasir.getDBConn();
+            java.sql.PreparedStatement psCheck;
+
+            psCheck = connCheck.prepareStatement("SELECT "
+                    + "id, username, password, nama"
+                    + " FROM user"
+                    + " WHERE user.id = '" + idLogin + "' "
+            );
+            rs = psCheck.executeQuery();
+
+            boolean isPass = false;
+            while (rs.next()) {
+                if (vKasir.getAuthEncryptor().checkPassword(
+                        passwd, rs.getString("password"))) {
+                    isPass = true;
+                }
+            }
+
+            if (!isPass) {
+                JOptionPane.showMessageDialog(null, "Maaf, password User Login "
+                        + "SALAH! Mohon ulangi kembali");
+                return;
+            }
 
             if (this.tipeForm == 1) { //tambah
                 String sql
-                        = "insert into barang "
-                        + "(nama, satuan_id, harga_beli, harga_jual,kode) values('"
-                        + tfNamaBarang.getText() + "','" + satuanId + "','"
-                        + tfHargaBeli.getText() + "','" + tfHargaJual.getText()
-                        + "','" + tfKode.getText() + "')";
+                        = "insert into user "
+                        + "(nama, username, password) values('"
+                        + tfNama.getText() + "','" + tfUsername.getText() 
+                        + "','" + userPass
+                        + "')";
 
                 java.sql.Connection conn = vKasir.getDBConn();
                 java.sql.PreparedStatement pst = conn.prepareStatement(sql);
@@ -258,81 +260,65 @@ public class VKelolaBarangForm extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(null, "Berhasil disimpan");
             } else {
                 java.sql.Connection conn = vKasir.getDBConn();
-                java.sql.PreparedStatement ps = conn.prepareStatement("UPDATE "
-                        + " barang"
-                        + " SET NAMA = '" + tfNamaBarang.getText() + "'"
-                        + ", satuan_id = '" + satuanId + "'"
-                        + ", harga_beli = '" + tfHargaBeli.getText() + "'"
-                        + ", harga_jual = '" + tfHargaJual.getText() + "'"
-                        + ", kode = '" + tfKode.getText() + "'"
-                        + " WHERE id = '" + vKelolaBarang.getSelectedRowId() + "' "
-                );
+                java.sql.PreparedStatement ps;
+                if (userPassPlain.equalsIgnoreCase("")) {
+                    ps = conn.prepareStatement("UPDATE "
+                            + " user"
+                            + " SET nama = '" + tfNama.getText() + "'"
+                            + ", username = '" + tfUsername.getText() + "'"
+                            + " WHERE id = '" + vKelolaUser.getSelectedRowId() + "' "
+                    );
+                } else {
+                    ps = conn.prepareStatement("UPDATE "
+                            + " user"
+                            + " SET nama = '" + tfNama.getText() + "'"
+                            + ", username = '" + tfUsername.getText() + "'"
+                            + ", password = '" + userPass + "'"
+                            + " WHERE id = '" + vKelolaUser.getSelectedRowId() + "' "
+                    );
+                }
+
                 ps.executeUpdate();
             }
 
-            tfNamaBarang.setText("");
-            tfHargaBeli.setText("");
-            tfHargaJual.setText("");
-            tfKode.setText("");
+            tfNama.setText("");
+            tfUsername.setText("");
+            jpfPassword.setText("");
+            jpfPasswordConfirm.setText("");
 
-            vKelolaBarang.getData("");
+            vKelolaUser.getData("");
 
         } catch (SQLException | HeadlessException e) {
-            JOptionPane.showMessageDialog(null, e);
+            JOptionPane.showMessageDialog(null, "Gagal menyimpan data : "+e);
+        } catch (ParseException ex) {
+            ex.printStackTrace();
         }
     }//GEN-LAST:event_jbTombolMouseClicked
 
-    private void cbSatuanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbSatuanActionPerformed
-        // TODO add your handling code here:
-        Object item = cbSatuan.getSelectedItem();
-        String value = ((models.ItemBarang) item).getId();
-        satuanId = value;
-        System.out.println(value);
-    }//GEN-LAST:event_cbSatuanActionPerformed
-
-    public void setTfNamaBarang(String text) {
-        tfNamaBarang.setText(text);
+    public void setTfNama(String text) {
+        tfNama.setText(text);
     }
 
-    public void setTfHargaBeli(String text) {
-        tfHargaBeli.setText(text);
+    public void setTfUsername(String text) {
+        tfUsername.setText(text);
     }
 
-    public void setTfHargaJual(String text) {
-        tfHargaJual.setText(text);
-    }
-
-    public void setTfKode(String text) {
-        tfKode.setText(text);
-    }
-
-    public void setCbSatuan(ItemBarang itemBarang) {
-        int cbSize = cbSatuan.getItemCount();
-
-        for (int i = 0; i < cbSize; i++) {
-            models.ItemBarang isi = cbSatuan.getItemAt(i);
-
-//            bandingkan isinya
-            if (isi.equals(itemBarang)) {
-                System.out.println("bener");
-                cbSatuan.setSelectedIndex(i);
-            }
-        }
+    public void setUserId(String text) {
+        this.userId = text;
     }
 
     public void setType(int type) {
         this.tipeForm = type;
         if (type == 1) {
-            this.setTitle("TANI JAYA - Tambah Barang");
+            this.setTitle("TANI JAYA - Tambah User");
             jbTombol.setText("TAMBAH");
         } else {
-            this.setTitle("TANI JAYA - Edit Barang");
+            this.setTitle("TANI JAYA - Edit User");
             jbTombol.setText("UPDATE");
         }
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox<models.ItemBarang> cbSatuan;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel4;
@@ -340,10 +326,9 @@ public class VKelolaBarangForm extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JButton jbTombol;
-    private javax.swing.JLabel jlHargaBeli;
-    private javax.swing.JTextField tfHargaBeli;
-    private javax.swing.JTextField tfHargaJual;
-    private javax.swing.JTextField tfKode;
-    private javax.swing.JTextField tfNamaBarang;
+    private javax.swing.JPasswordField jpfPassword;
+    private javax.swing.JPasswordField jpfPasswordConfirm;
+    private javax.swing.JTextField tfNama;
+    private javax.swing.JTextField tfUsername;
     // End of variables declaration//GEN-END:variables
 }

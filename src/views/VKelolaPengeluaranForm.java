@@ -5,13 +5,17 @@
  */
 package views;
 
+import java.awt.Color;
 import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +26,7 @@ import models.ItemBarang;
  *
  * @author Chandra
  */
-public class VKelolaBarangForm extends javax.swing.JFrame {
+public class VKelolaPengeluaranForm extends javax.swing.JFrame {
 
     VKasir vKasir = VKasir.getInstance();
     private String satuanId;
@@ -32,11 +36,11 @@ public class VKelolaBarangForm extends javax.swing.JFrame {
     /**
      * Creates new form VKasir
      */
-    public VKelolaBarangForm(int type) {
+    public VKelolaPengeluaranForm(int type) {
         Toolkit kit = Toolkit.getDefaultToolkit();
         Image img = kit.createImage(vKasir.getLogo());
         setIconImage(img);
-        
+
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -55,39 +59,14 @@ public class VKelolaBarangForm extends javax.swing.JFrame {
         }
 
         initComponents();
+        //        set color
+        jPanel2.setBackground(
+                Color.decode(vKasir.getAppConfig().getConfig("APP_MAIN_COLOR")));
+
         this.tipeForm = type;
-        if (type == 1) {
-            this.setTitle(vKasir.getAppConfig()
-                .getConfig("APP_NAME")+" - Tambah Barang");
-            jbTombol.setText("TAMBAH");
-        } else {
-            this.setTitle(vKasir.getAppConfig()
-                .getConfig("APP_NAME")+" - Edit Barang");
-            jbTombol.setText("UPDATE");
-        }
 
-        cbSatuan.removeAllItems(); //digunakan untuk membersihkan item jcombobox sebelum diisi.
-        setCbSatuan();
-    }
-
-    public void setCbSatuan() {
-        try {
-            java.sql.ResultSet rs;
-            java.sql.Connection conn = vKasir.getDBConn();
-            java.sql.PreparedStatement ps = conn.prepareStatement("SELECT id, satuan FROM satuan");
-            rs = ps.executeQuery();
-
-            models.ItemBarang ib;
-
-            while (rs.next()) {
-                ib = new models.ItemBarang(rs.getString(1), rs.getString(2));
-//                itemBarangs.add(ib);
-                System.out.println(rs.getString(1) + " " + rs.getString(2));
-                cbSatuan.addItem(ib);
-            }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "ERROR load satuan " + e.getMessage());
-        }
+        setType(tipeForm);
+        jdcTanggal.setDateFormatString("dd MMMM yyyy");
     }
 
     /**
@@ -102,21 +81,17 @@ public class VKelolaBarangForm extends javax.swing.JFrame {
         jPanel2 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        tfNamaBarang = new javax.swing.JTextField();
-        jLabel2 = new javax.swing.JLabel();
         jlHargaBeli = new javax.swing.JLabel();
-        tfHargaBeli = new javax.swing.JTextField();
+        tfPengeluaran = new javax.swing.JTextField();
         jbTombol = new javax.swing.JButton();
-        tfKode = new javax.swing.JTextField();
+        tfKeterangan = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
-        cbSatuan = new javax.swing.JComboBox<>();
-        tfHargaJual = new javax.swing.JTextField();
-        jLabel5 = new javax.swing.JLabel();
+        jdcTanggal = new com.toedter.calendar.JDateChooser();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
 
-        jPanel2.setBackground(new java.awt.Color(0, 204, 0));
+        jPanel2.setBackground(new java.awt.Color(255, 255, 255));
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -132,17 +107,12 @@ public class VKelolaBarangForm extends javax.swing.JFrame {
         jPanel3.setBackground(new java.awt.Color(204, 204, 204));
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jLabel1.setText("NAMA BARANG");
-
-        tfNamaBarang.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-
-        jLabel2.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jLabel2.setText("SATUAN");
+        jLabel1.setText("TGL TRANSAKSI");
 
         jlHargaBeli.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jlHargaBeli.setText("HARGA MODAL (Rp.)");
+        jlHargaBeli.setText("PENGELUARAN (Rp.)");
 
-        tfHargaBeli.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        tfPengeluaran.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
 
         jbTombol.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         jbTombol.setText("TAMBAH");
@@ -151,22 +121,16 @@ public class VKelolaBarangForm extends javax.swing.JFrame {
                 jbTombolMouseClicked(evt);
             }
         });
-
-        tfKode.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-
-        jLabel4.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jLabel4.setText("KODE (Optional)");
-
-        cbSatuan.addActionListener(new java.awt.event.ActionListener() {
+        jbTombol.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cbSatuanActionPerformed(evt);
+                jbTombolActionPerformed(evt);
             }
         });
 
-        tfHargaJual.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        tfKeterangan.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
 
-        jLabel5.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jLabel5.setText("HARGA JUAL (Rp.)");
+        jLabel4.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        jLabel4.setText("KETERANGAN PENGELUARAN");
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -176,16 +140,12 @@ public class VKelolaBarangForm extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel1)
-                    .addComponent(tfNamaBarang)
-                    .addComponent(jLabel2)
                     .addComponent(jlHargaBeli)
-                    .addComponent(tfHargaBeli)
+                    .addComponent(tfPengeluaran)
                     .addComponent(jbTombol, javax.swing.GroupLayout.DEFAULT_SIZE, 255, Short.MAX_VALUE)
                     .addComponent(jLabel4)
-                    .addComponent(tfKode)
-                    .addComponent(cbSatuan, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel5)
-                    .addComponent(tfHargaJual))
+                    .addComponent(tfKeterangan)
+                    .addComponent(jdcTanggal, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
@@ -193,30 +153,20 @@ public class VKelolaBarangForm extends javax.swing.JFrame {
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(tfNamaBarang, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(15, 15, 15)
+                .addGap(2, 2, 2)
+                .addComponent(jdcTanggal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(tfKode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(tfKeterangan, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cbSatuan, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(7, 7, 7)
                 .addComponent(jlHargaBeli)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(tfHargaBeli, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel5)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(tfHargaJual, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(tfPengeluaran, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jbTombol)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(15, Short.MAX_VALUE))
         );
-
-        tfNamaBarang.getAccessibleContext().setAccessibleName("");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -240,110 +190,106 @@ public class VKelolaBarangForm extends javax.swing.JFrame {
 
     private void jbTombolMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jbTombolMouseClicked
         // TODO add your handling code here:
+    }//GEN-LAST:event_jbTombolMouseClicked
+
+    private void jbTombolActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbTombolActionPerformed
+        // TODO add your handling code here:
+        this.action();
+    }//GEN-LAST:event_jbTombolActionPerformed
+
+    private void action() {
         try {
-            VKelolaBarang vKelolaBarang = vKasir.getKelolaBarang();
+            VKelolaPengeluaran vKelolaPengeluaran = vKasir.getKelolaPengeluaran();
+
+            SimpleDateFormat dcn = new SimpleDateFormat("yyyy-MM-dd");
+            String tgl_transaksi = dcn.format(jdcTanggal.getDate());
 
             if (this.tipeForm == 1) { //tambah
+//                 buat ID untuk transaksi
+                Calendar calendar = Calendar.getInstance();
+                String idTrx = "TRXP" + calendar.getTimeInMillis();
+
                 String sql
-                        = "insert into barang "
-                        + "(nama, satuan_id, harga_beli, harga_jual,kode) values('"
-                        + tfNamaBarang.getText() + "','" + satuanId + "','"
-                        + tfHargaBeli.getText() + "','" + tfHargaJual.getText()
-                        + "','" + tfKode.getText() + "')";
+                        = "insert into pengeluaran "
+                        + "(id, keterangan, total, tgl_transaksi) values('"
+                        + idTrx
+                        + "','" + tfKeterangan.getText()
+                        + "'," + Integer.parseInt(tfPengeluaran.getText())
+                        + ",'" + tgl_transaksi + "')";
+                
+                System.out.println(sql);
 
                 java.sql.Connection conn = vKasir.getDBConn();
                 java.sql.PreparedStatement pst = conn.prepareStatement(sql);
                 pst.execute();
-
-                JOptionPane.showMessageDialog(null, "Berhasil disimpan");
             } else {
                 java.sql.Connection conn = vKasir.getDBConn();
                 java.sql.PreparedStatement ps = conn.prepareStatement("UPDATE "
-                        + " barang"
-                        + " SET NAMA = '" + tfNamaBarang.getText() + "'"
-                        + ", satuan_id = '" + satuanId + "'"
-                        + ", harga_beli = '" + tfHargaBeli.getText() + "'"
-                        + ", harga_jual = '" + tfHargaJual.getText() + "'"
-                        + ", kode = '" + tfKode.getText() + "'"
-                        + " WHERE id = '" + vKelolaBarang.getSelectedRowId() + "' "
+                        + " pengeluaran SET"
+                        + " keterangan = '" + tfKeterangan.getText() + "'"
+                        + ", total = " + Integer.parseInt(tfPengeluaran.getText()) + ""
+                        + ", tgl_transaksi = '" + tgl_transaksi + "'"
+                        + " WHERE id = '" + vKelolaPengeluaran.getSelectedRowId() + "' "
                 );
                 ps.executeUpdate();
             }
 
-            tfNamaBarang.setText("");
-            tfHargaBeli.setText("");
-            tfHargaJual.setText("");
-            tfKode.setText("");
-
-            vKelolaBarang.getData("");
+            tfKeterangan.setText("");
+            tfPengeluaran.setText("");
+            jdcTanggal.setCalendar(null);
+            vKelolaPengeluaran.getData("");
+            this.setVisible(false);
+            JOptionPane.showMessageDialog(null, "Berhasil disimpan");
 
         } catch (SQLException | HeadlessException e) {
             JOptionPane.showMessageDialog(null, e);
+        } catch (ParseException ex) {
+            ex.printStackTrace();
         }
-    }//GEN-LAST:event_jbTombolMouseClicked
-
-    private void cbSatuanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbSatuanActionPerformed
-        // TODO add your handling code here:
-        Object item = cbSatuan.getSelectedItem();
-        String value = ((models.ItemBarang) item).getId();
-        satuanId = value;
-        System.out.println(value);
-    }//GEN-LAST:event_cbSatuanActionPerformed
-
-    public void setTfNamaBarang(String text) {
-        tfNamaBarang.setText(text);
     }
 
-    public void setTfHargaBeli(String text) {
-        tfHargaBeli.setText(text);
+    public void setTfKeterangan(String text) {
+        tfKeterangan.setText(text);
     }
 
-    public void setTfHargaJual(String text) {
-        tfHargaJual.setText(text);
+    public void setTfTotal(String text) {
+        double d = Double.parseDouble(text);
+        int i = (int)d;  
+        tfPengeluaran.setText(Integer.toString(i));
     }
-
-    public void setTfKode(String text) {
-        tfKode.setText(text);
-    }
-
-    public void setCbSatuan(ItemBarang itemBarang) {
-        int cbSize = cbSatuan.getItemCount();
-
-        for (int i = 0; i < cbSize; i++) {
-            models.ItemBarang isi = cbSatuan.getItemAt(i);
-
-//            bandingkan isinya
-            if (isi.equals(itemBarang)) {
-                System.out.println("bener");
-                cbSatuan.setSelectedIndex(i);
-            }
+    
+    public void setjdcTanggal(String text) {
+   java.util.Date date2;
+        try {
+            date2 = new SimpleDateFormat("yyyy-MM-dd").parse(text);
+            jdcTanggal.setDate(date2);
+        } catch (ParseException ex) {
+            ex.printStackTrace();
         }
     }
 
     public void setType(int type) {
         this.tipeForm = type;
         if (type == 1) {
-            this.setTitle("TANI JAYA - Tambah Barang");
+            this.setTitle(vKasir.getAppConfig()
+                    .getConfig("APP_NAME") + " - Tambah Barang");
             jbTombol.setText("TAMBAH");
         } else {
-            this.setTitle("TANI JAYA - Edit Barang");
+            this.setTitle(vKasir.getAppConfig()
+                    .getConfig("APP_NAME") + " - Edit Barang");
             jbTombol.setText("UPDATE");
         }
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox<models.ItemBarang> cbSatuan;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JButton jbTombol;
+    private com.toedter.calendar.JDateChooser jdcTanggal;
     private javax.swing.JLabel jlHargaBeli;
-    private javax.swing.JTextField tfHargaBeli;
-    private javax.swing.JTextField tfHargaJual;
-    private javax.swing.JTextField tfKode;
-    private javax.swing.JTextField tfNamaBarang;
+    private javax.swing.JTextField tfKeterangan;
+    private javax.swing.JTextField tfPengeluaran;
     // End of variables declaration//GEN-END:variables
 }

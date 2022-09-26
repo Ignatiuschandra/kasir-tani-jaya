@@ -5,6 +5,7 @@
  */
 package views;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Image;
@@ -72,7 +73,11 @@ public class VKelolaBarang extends javax.swing.JFrame {
         }
 
         initComponents();
-
+        
+        //        set color
+        jPanel2.setBackground(
+                Color.decode(vKasir.getAppConfig().getConfig("APP_MAIN_COLOR")));
+        
         this.setTitle(vKasir.getAppConfig()
                 .getConfig("APP_NAME")+" - Kelola Barang");
 
@@ -211,7 +216,7 @@ public class VKelolaBarang extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
 
-        jPanel2.setBackground(new java.awt.Color(0, 204, 0));
+        jPanel2.setBackground(new java.awt.Color(255, 255, 255));
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -412,6 +417,15 @@ public class VKelolaBarang extends javax.swing.JFrame {
 //    method delete
     private void deleteData() {
         try {
+            int n = JOptionPane.showConfirmDialog(
+                            null, "Apakah Anda yakin ingin menghapus data barang ini?",
+                            "Hapus Barang",
+                            JOptionPane.YES_NO_OPTION);
+            
+            if (n == JOptionPane.NO_OPTION) {
+                return;
+            }
+            
             String sId = this.selectedRowId;
             if (sId == "0") {
                 JOptionPane.showMessageDialog(null, "Silahkan pilih data terlebih dahulu!");
@@ -426,6 +440,7 @@ public class VKelolaBarang extends javax.swing.JFrame {
 
                 jSearch.setText("");
                 getData("");
+                JOptionPane.showMessageDialog(null, "Berhasil menghapus data!");
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "ERROR load data " + e.getMessage());

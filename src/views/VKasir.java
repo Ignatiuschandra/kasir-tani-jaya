@@ -5,9 +5,11 @@
  */
 package views;
 
+import controllers.AuthEncryptor;
 import controllers.ConfigManagement;
 import controllers.FocusTextField;
 import controllers.MyIntFilter;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -65,6 +67,11 @@ public class VKasir extends javax.swing.JFrame {
     static VKelolaHutangForm vKelolaHutangForm;
     static VReportTransaksi vReportTransaksi;
     static VKelolaHutang vKelolaHutang;
+    static VLoginForm vLoginForm;
+    static VKelolaUser vKelolaUser;
+    static VKelolaUserForm vKelolaUserForm;
+    static VKelolaPengeluaran vKelolaPengeluaran;
+    static VKelolaPengeluaranForm vKelolaPengeluaranForm;
     static Connection conn;
     static Statement stm;
     private Map<String, String> map;
@@ -76,8 +83,9 @@ public class VKasir extends javax.swing.JFrame {
     private static Locale locale = new Locale("id", "ID");
     private static volatile VKasir instance;
     private java.net.URL urlImage = ClassLoader
-                    .getSystemResource("main/resources/images/logo.png");
+            .getSystemResource("main/resources/images/logo.png");
     private static ConfigManagement conf = new ConfigManagement();
+    private static AuthEncryptor ae = new AuthEncryptor();
 
     private VKasir() {
         initComponents();
@@ -85,12 +93,18 @@ public class VKasir extends javax.swing.JFrame {
         System.out.println("CREATE" + instantiationCounter);
 
         jlAppName.setText(conf.getConfig("APP_NAME"));
-        this.setTitle(conf.getConfig("APP_NAME")+" - Kasir");
-        
+        this.setTitle(conf.getConfig("APP_NAME") + " - Kasir");
+
+//        set color
+        jPanel2.setBackground(
+                Color.decode(conf.getConfig("APP_MAIN_COLOR")));
+        lTotalHarga.setForeground(
+                Color.decode(conf.getConfig("APP_SECONDARY_COLOR")));
+
         Toolkit kit = Toolkit.getDefaultToolkit();
         Image img = kit.createImage(urlImage);
         setIconImage(img);
-        
+
         lTotalHarga.setText("Rp. " + totalHarga);
 
         //init combobox
@@ -170,11 +184,11 @@ public class VKasir extends javax.swing.JFrame {
         tKasir.getColumnModel().getColumn(7).setMinWidth(0);
         tKasir.getColumnModel().getColumn(7).setMaxWidth(0);
         tKasir.getColumnModel().getColumn(7).setWidth(0);
-        
+
         tKasir.getColumnModel().getColumn(8).setMinWidth(0);
         tKasir.getColumnModel().getColumn(8).setMaxWidth(0);
         tKasir.getColumnModel().getColumn(8).setWidth(0);
-        
+
         tKasir.getColumnModel().getColumn(9).setMinWidth(0);
         tKasir.getColumnModel().getColumn(9).setMaxWidth(0);
         tKasir.getColumnModel().getColumn(9).setWidth(0);
@@ -251,20 +265,36 @@ public class VKasir extends javax.swing.JFrame {
     public VKelolaBarangForm getFormTambah() {
         return vKelolaBarangFormTambah;
     }
-    
+
     public VKelolaHutang getKelolaHutang() {
         return vKelolaHutang;
     }
-    
+
     public VKelolaHutangForm getFormHutang() {
         return vKelolaHutangForm;
+    }
+    
+    public VKelolaUser getKelolaUser() {
+        return vKelolaUser;
+    }
+    
+    public VKelolaUserForm getFormUser() {
+        return vKelolaUserForm;
+    }
+    
+    public VKelolaPengeluaran getKelolaPengeluaran() {
+        return vKelolaPengeluaran;
+    }
+    
+    public VKelolaPengeluaranForm getKelolaPengeluaranForm() {
+        return vKelolaPengeluaranForm;
     }
 
     public Connection getDBConn() {
         return conn;
     }
-    
-    public java.net.URL getLogo(){
+
+    public java.net.URL getLogo() {
         return urlImage;
     }
 
@@ -279,13 +309,17 @@ public class VKasir extends javax.swing.JFrame {
         lTotalHarga.setText("Rp. " + Integer.toString(this.totalHarga));
         System.out.println("Total new : " + lTotalHarga.getText());
     }
-    
+
     public Locale getAppLocale() {
         return this.locale;
     }
-    
+
     public ConfigManagement getAppConfig() {
         return this.conf;
+    }
+    
+    public AuthEncryptor getAuthEncryptor() {
+        return this.ae;
     }
 
     public void updateSearch(String keyword) {
@@ -331,6 +365,8 @@ public class VKasir extends javax.swing.JFrame {
         jButton4 = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
         jButton6 = new javax.swing.JButton();
+        jbKelolaUser = new javax.swing.JButton();
+        jButton7 = new javax.swing.JButton();
         jPanel5 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         bTambah = new javax.swing.JButton();
@@ -377,7 +413,7 @@ public class VKasir extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jPanel2.setBackground(new java.awt.Color(0, 204, 0));
+        jPanel2.setBackground(new java.awt.Color(255, 255, 255));
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -399,9 +435,14 @@ public class VKasir extends javax.swing.JFrame {
                 jButton3MouseClicked(evt);
             }
         });
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
 
         jButton4.setFont(new java.awt.Font("Tahoma", 1, 16)); // NOI18N
-        jButton4.setText("REKAP PENJUALAN");
+        jButton4.setText("MASTER TRANSAKSI");
         jButton4.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton4ActionPerformed(evt);
@@ -418,6 +459,27 @@ public class VKasir extends javax.swing.JFrame {
 
         jButton6.setFont(new java.awt.Font("Tahoma", 1, 16)); // NOI18N
         jButton6.setText("LOG OUT");
+        jButton6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton6ActionPerformed(evt);
+            }
+        });
+
+        jbKelolaUser.setFont(new java.awt.Font("Tahoma", 1, 16)); // NOI18N
+        jbKelolaUser.setText("KELOLA USER");
+        jbKelolaUser.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbKelolaUserActionPerformed(evt);
+            }
+        });
+
+        jButton7.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        jButton7.setText("KELOLA PENGELUARAN");
+        jButton7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton7ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -429,7 +491,9 @@ public class VKasir extends javax.swing.JFrame {
                     .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jButton4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jButton5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButton6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jButton6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jbKelolaUser, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jButton7, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel4Layout.setVerticalGroup(
@@ -438,9 +502,13 @@ public class VKasir extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jButton7, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jbKelolaUser, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -489,7 +557,7 @@ public class VKasir extends javax.swing.JFrame {
         jLabel3.setText("TOTAL BELANJA");
 
         lTotalHarga.setFont(new java.awt.Font("Tahoma", 1, 36)); // NOI18N
-        lTotalHarga.setForeground(new java.awt.Color(0, 153, 0));
+        lTotalHarga.setForeground(new java.awt.Color(255, 255, 255));
         lTotalHarga.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lTotalHarga.setText("Rp 0");
 
@@ -700,7 +768,7 @@ public class VKasir extends javax.swing.JFrame {
 
                 psDetail.execute();
             }
-            
+
             JOptionPane.showMessageDialog(null, "Transaksi Selesai");
             //menghapus isi table tblGaji
             dtmModel.getDataVector().removeAllElements();
@@ -772,7 +840,7 @@ public class VKasir extends javax.swing.JFrame {
             vKelolaBarang.setLocationRelativeTo(null);
             vKelolaBarang.setVisible(true);
             vKelolaBarang.setDefaultCloseOperation(VKelolaBarang.DISPOSE_ON_CLOSE);
-        }else{
+        } else {
             vKelolaBarang.setVisible(true);
         }
         vKelolaBarang.getData("");
@@ -789,7 +857,7 @@ public class VKasir extends javax.swing.JFrame {
             vReportTransaksi.setLocationRelativeTo(null);
             vReportTransaksi.setVisible(true);
             vReportTransaksi.setDefaultCloseOperation(VReportTransaksi.DISPOSE_ON_CLOSE);
-        }else{
+        } else {
             vReportTransaksi.setVisible(true);
         }
         try {
@@ -806,7 +874,7 @@ public class VKasir extends javax.swing.JFrame {
             vKelolaHutang.setLocationRelativeTo(null);
             vKelolaHutang.setVisible(true);
             vKelolaHutang.setDefaultCloseOperation(VReportTransaksi.DISPOSE_ON_CLOSE);
-        }else{
+        } else {
             vKelolaHutang.setVisible(true);
         }
         try {
@@ -815,6 +883,52 @@ public class VKasir extends javax.swing.JFrame {
             Logger.getLogger(VKasir.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_jButton5ActionPerformed
+
+    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+//        hide kasir
+        this.setVisible(false);
+        vLoginForm.resetForm();
+        vLoginForm.setVisible(true);
+        ae.setIdLogin("");
+    }//GEN-LAST:event_jButton6ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void jbKelolaUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbKelolaUserActionPerformed
+        // TODO add your handling code here:
+        if (!vKelolaUser.isVisible()) {
+            vKelolaUser.pack();
+            vKelolaUser.setLocationRelativeTo(null);
+            vKelolaUser.setVisible(true);
+            vKelolaUser.setDefaultCloseOperation(VReportTransaksi.DISPOSE_ON_CLOSE);
+        } else {
+            vKelolaUser.setVisible(true);
+        }
+        try {
+            vKelolaUser.getData("");
+        } catch (ParseException ex) {
+            Logger.getLogger(VKasir.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_jbKelolaUserActionPerformed
+
+    private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
+        // TODO add your handling code here:
+        if (!vKelolaPengeluaran.isVisible()) {
+            vKelolaPengeluaran.pack();
+            vKelolaPengeluaran.setLocationRelativeTo(null);
+            vKelolaPengeluaran.setVisible(true);
+            vKelolaPengeluaran.setDefaultCloseOperation(VReportTransaksi.DISPOSE_ON_CLOSE);
+        } else {
+            vKelolaPengeluaran.setVisible(true);
+        }
+        try {
+            vKelolaPengeluaran.getData("");
+        } catch (ParseException ex) {
+            Logger.getLogger(VKasir.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_jButton7ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -845,7 +959,7 @@ public class VKasir extends javax.swing.JFrame {
 
         // Connect DB
         try {
-            String url = "jdbc:mysql://localhost:3306/"+conf.getConfig("DB_NAME");
+            String url = "jdbc:mysql://localhost:3306/" + conf.getConfig("DB_NAME");
             String user = conf.getConfig("DB_USN");
             String pass = conf.getConfig("DB_PWD");
             Class.forName("com.mysql.cj.jdbc.Driver");
@@ -854,23 +968,32 @@ public class VKasir extends javax.swing.JFrame {
             System.out.println("Koneksi berhasil;");
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Koneksi Gagal " + e.getMessage());
+            System.exit(0);
         }
 
         VKasir vKasir = VKasir.getInstance();
+        vLoginForm = new VLoginForm();
         vKelolaBarang = new VKelolaBarang();
         vKelolaBarangForm = new VKelolaBarangForm(1);
         vKelolaBarangFormTambah = new VKelolaBarangForm(1);
         vReportTransaksi = new VReportTransaksi();
         vKelolaHutang = new VKelolaHutang();
         vKelolaHutangForm = new VKelolaHutangForm();
-
+        vKelolaUser = new VKelolaUser();
+        vKelolaUserForm = new VKelolaUserForm(1);
+        vKelolaPengeluaran = new VKelolaPengeluaran();
+        vKelolaPengeluaranForm = new VKelolaPengeluaranForm(1);
+        
 //        System.out.println("how many : "+vKasir.getInstantiationCounter());
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
 //                new VKasir().setVisible(true);
-                vKasir.setVisible(true);
+//                vKasir.setVisible(true);
+                vLoginForm.pack();
+                vLoginForm.setLocationRelativeTo(null);
+                vLoginForm.setVisible(true);
             }
         });
     }
@@ -900,6 +1023,7 @@ public class VKasir extends javax.swing.JFrame {
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton6;
+    private javax.swing.JButton jButton7;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel5;
@@ -913,6 +1037,7 @@ public class VKasir extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JButton jbKelolaUser;
     private javax.swing.JLabel jlAppName;
     private javax.swing.JLabel lTotalHarga;
     private javax.swing.JTable tKasir;

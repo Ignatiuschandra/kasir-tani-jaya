@@ -5,19 +5,27 @@
  */
 package views;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.HeadlessException;
 import java.awt.Image;
+import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import models.ItemBarang;
 
@@ -25,7 +33,7 @@ import models.ItemBarang;
  *
  * @author Chandra
  */
-public class VKelolaHutangForm extends javax.swing.JFrame {
+public class VLoginForm extends javax.swing.JFrame {
 
     VKasir vKasir = VKasir.getInstance();
     private String satuanId;
@@ -35,11 +43,11 @@ public class VKelolaHutangForm extends javax.swing.JFrame {
     /**
      * Creates new form VKasir
      */
-    public VKelolaHutangForm() {
+    public VLoginForm() {
         Toolkit kit = Toolkit.getDefaultToolkit();
         Image img = kit.createImage(vKasir.getLogo());
         setIconImage(img);
-        
+
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -57,10 +65,29 @@ public class VKelolaHutangForm extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(VKelolaBarang.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
 
-        this.setTitle(vKasir.getAppConfig()
-                .getConfig("APP_NAME")+" - Bayar Hutang");
         initComponents();
-        tfTotal.addActionListener(tfEnterKey);
+
+        this.setTitle(vKasir.getAppConfig().getConfig("APP_NAME"));
+
+        //        set color
+        jPanel2.setBackground(
+                Color.decode(vKasir.getAppConfig().getConfig("APP_MAIN_COLOR")));
+
+        BufferedImage img2 = null;
+        try {
+            img2 = ImageIO.read(new File("src/main/resources/images/logo.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Image dimg = img2.getScaledInstance(
+                jlLogo.getWidth(), jlLogo.getHeight(), Image.SCALE_SMOOTH
+        );
+
+        ImageIcon imageIcon = new ImageIcon(dimg);
+        jlLogo.setIcon(imageIcon);
+
+//        tfTotal.addActionListener(tfEnterKey);
     }
 
     /**
@@ -75,15 +102,16 @@ public class VKelolaHutangForm extends javax.swing.JFrame {
         jPanel2 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        tfNamaBarang = new javax.swing.JTextField();
+        tfUsername = new javax.swing.JTextField();
         jlHargaBeli = new javax.swing.JLabel();
         jbTombol = new javax.swing.JButton();
-        tfTotal = new javax.swing.JTextField();
+        jlLogo = new javax.swing.JLabel();
+        jpfPassword = new javax.swing.JPasswordField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
 
-        jPanel2.setBackground(new java.awt.Color(0, 204, 0));
+        jPanel2.setBackground(new java.awt.Color(255, 255, 255));
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -99,16 +127,22 @@ public class VKelolaHutangForm extends javax.swing.JFrame {
         jPanel3.setBackground(new java.awt.Color(204, 204, 204));
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jLabel1.setText("NAMA CUSTOMER");
+        jLabel1.setText("Username");
 
-        tfNamaBarang.setEditable(false);
-        tfNamaBarang.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        tfUsername.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        tfUsername.setText("admin");
+        tfUsername.setMinimumSize(new java.awt.Dimension(60, 21));
+        tfUsername.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                tfUsernameActionPerformed(evt);
+            }
+        });
 
         jlHargaBeli.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jlHargaBeli.setText("TOTAL (Rp.)");
+        jlHargaBeli.setText("Password");
 
         jbTombol.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jbTombol.setText("BAYAR");
+        jbTombol.setText("LOGIN");
         jbTombol.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jbTombolMouseClicked(evt);
@@ -120,151 +154,145 @@ public class VKelolaHutangForm extends javax.swing.JFrame {
             }
         });
 
-        tfTotal.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jpfPassword.setText("admin2o2z");
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(117, 117, 117)
+                .addComponent(jlLogo, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(118, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel1)
-                    .addComponent(tfNamaBarang)
                     .addComponent(jlHargaBeli)
-                    .addComponent(jbTombol, javax.swing.GroupLayout.DEFAULT_SIZE, 255, Short.MAX_VALUE)
-                    .addComponent(tfTotal))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(tfUsername, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jbTombol, javax.swing.GroupLayout.DEFAULT_SIZE, 250, Short.MAX_VALUE)
+                    .addComponent(jpfPassword))
+                .addGap(45, 45, 45))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(12, 12, 12)
+                .addComponent(jlLogo, javax.swing.GroupLayout.DEFAULT_SIZE, 101, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(tfNamaBarang, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(tfUsername, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jlHargaBeli)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(tfTotal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jbTombol)
-                .addContainerGap(10, Short.MAX_VALUE))
+                .addGap(5, 5, 5)
+                .addComponent(jpfPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jbTombol, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(40, 40, 40))
         );
 
-        tfNamaBarang.getAccessibleContext().setAccessibleName("");
+        tfUsername.getAccessibleContext().setAccessibleName("");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+            .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, 0)
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jbTombolMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jbTombolMouseClicked
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jbTombolMouseClicked
-
     private void jbTombolActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbTombolActionPerformed
         // TODO add your handling code here:
-        bayar();
-    }//GEN-LAST:event_jbTombolActionPerformed
+        String uname = tfUsername.getText();
+        String passwd = new String(jpfPassword.getPassword());
+        String encryptedPasswd
+                = vKasir.getAuthEncryptor().hashPassword(passwd);
 
-    public void setTfNamaBarang(String text) {
-        tfNamaBarang.setText(text);
-    }
-
-    public void setTfHargaJual(String text) {
-        tfTotal.setText(text);
-    }
-
-    public void setType(int type) {
-        this.tipeForm = type;
-        if (type == 1) {
-            this.setTitle("TANI JAYA - Tambah Barang");
-            jbTombol.setText("TAMBAH");
-        } else {
-            this.setTitle("TANI JAYA - Edit Barang");
-            jbTombol.setText("UPDATE");
-        }
-    }
-
-    public void bayar() {
-        VKelolaHutang vKelolaHutang = vKasir.getKelolaHutang();
-        String isLunas = "0";
-        int hutangJml = 0;
-        int uangDiserahkan = 0;
-
-//        Bandingkan harga apakah jika ditambah akan lunas
         java.sql.ResultSet rs;
         java.sql.Connection conn = vKasir.getDBConn();
         java.sql.PreparedStatement ps;
         try {
             ps = conn.prepareStatement("SELECT "
-                    + "id, pelanggan, total, uang_diserahkan"
-                    + " FROM transaksi"
-                    + " WHERE transaksi.id = '" + vKelolaHutang.getSelectedRowId() + "' "
+                    + "id, username, password, nama"
+                    + " FROM user"
+                    + " WHERE user.username = '" + uname + "' "
             );
             rs = ps.executeQuery();
 
+            boolean isEmpty = true;
             while (rs.next()) {
-                hutangJml = (int) Math.round(
-                        Double.parseDouble(rs.getString("total"))
-                        - Double.parseDouble(rs.getString("uang_diserahkan"))
-                );
-
-                uangDiserahkan
-                        = (int) Math.round(Double.parseDouble(rs.getString("uang_diserahkan"))
-                                + Integer.parseInt(tfTotal.getText()));
+                isEmpty = false;
+                if (vKasir.getAuthEncryptor().checkPassword(
+                        passwd, rs.getString("password"))) {
+                    vKasir.setVisible(true);
+                    this.setVisible(false);
+                    JOptionPane.showMessageDialog(null, "Selamat datang, "
+                            + rs.getString("nama") + "!");
+                    
+                    // save login id
+                    vKasir.getAuthEncryptor().setIdLogin(rs.getString("id"));
+                    return;
+                }
             }
 
-            if (uangDiserahkan >= hutangJml) {
-                isLunas = "1";
+            if (isEmpty) {
+                JOptionPane.showMessageDialog(null, "User tidak ditemukan!");
+            } else {
+                JOptionPane.showMessageDialog(null, "Username atau Password tidak sesuai!");
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
 
-        java.sql.PreparedStatement ps2;
-        try {
-            ps2 = conn.prepareStatement("UPDATE "
-                    + " transaksi"
-                    + " SET is_hutang = " + isLunas + ""
-                    + ", uang_diserahkan = " + uangDiserahkan + ""
-                    + " WHERE id = '" + vKelolaHutang.getSelectedRowId() + "' "
-            );
+    }//GEN-LAST:event_jbTombolActionPerformed
 
-            ps2.executeUpdate();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-        
-        try {
-            vKelolaHutang.getData("");
-        } catch (ParseException ex) {
-            ex.printStackTrace();
-        }
-        JOptionPane.showMessageDialog(null, "Pembayaran Berhasil!");
-        this.setVisible(false);
+    private void jbTombolMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jbTombolMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jbTombolMouseClicked
+
+    private void tfUsernameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tfUsernameActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_tfUsernameActionPerformed
+
+    public void setTfNamaBarang(String text) {
+        tfUsername.setText(text);
+    }
+
+    public void setTfHargaJual(String text) {
+//        tfTotal.setText(text);
+    }
+
+    public void resetForm() {
+        tfUsername.setText("");
+        jpfPassword.setText("");
+    }
+
+    private Image getScaledImage(Image srcImg, int w, int h) {
+        BufferedImage resizedImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = resizedImg.createGraphics();
+
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2.drawImage(srcImg, 0, 0, w, h, null);
+        g2.dispose();
+
+        return resizedImg;
     }
 
     Action tfEnterKey = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            bayar();
+            jbTombolActionPerformed(e);
         }
     };
 
@@ -274,7 +302,8 @@ public class VKelolaHutangForm extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel3;
     private javax.swing.JButton jbTombol;
     private javax.swing.JLabel jlHargaBeli;
-    private javax.swing.JTextField tfNamaBarang;
-    private javax.swing.JTextField tfTotal;
+    private javax.swing.JLabel jlLogo;
+    private javax.swing.JPasswordField jpfPassword;
+    private javax.swing.JTextField tfUsername;
     // End of variables declaration//GEN-END:variables
 }

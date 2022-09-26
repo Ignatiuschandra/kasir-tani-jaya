@@ -5,6 +5,7 @@
  */
 package views;
 
+import java.awt.Color;
 import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -39,7 +40,7 @@ public class VKelolaHutangForm extends javax.swing.JFrame {
         Toolkit kit = Toolkit.getDefaultToolkit();
         Image img = kit.createImage(vKasir.getLogo());
         setIconImage(img);
-        
+             
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -57,9 +58,14 @@ public class VKelolaHutangForm extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(VKelolaBarang.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
 
+        initComponents();
+        
         this.setTitle(vKasir.getAppConfig()
                 .getConfig("APP_NAME")+" - Bayar Hutang");
-        initComponents();
+        
+        //        set color
+        jPanel2.setBackground(
+                Color.decode(vKasir.getAppConfig().getConfig("APP_MAIN_COLOR")));
         tfTotal.addActionListener(tfEnterKey);
     }
 
@@ -83,7 +89,7 @@ public class VKelolaHutangForm extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
 
-        jPanel2.setBackground(new java.awt.Color(0, 204, 0));
+        jPanel2.setBackground(new java.awt.Color(255, 255, 255));
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);

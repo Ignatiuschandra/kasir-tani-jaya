@@ -5,6 +5,7 @@
  */
 package views;
 
+import java.awt.Color;
 import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -55,6 +56,10 @@ public class VKelolaBarangForm extends javax.swing.JFrame {
         }
 
         initComponents();
+        //        set color
+        jPanel2.setBackground(
+                Color.decode(vKasir.getAppConfig().getConfig("APP_MAIN_COLOR")));
+        
         this.tipeForm = type;
         if (type == 1) {
             this.setTitle(vKasir.getAppConfig()
@@ -116,7 +121,7 @@ public class VKelolaBarangForm extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
 
-        jPanel2.setBackground(new java.awt.Color(0, 204, 0));
+        jPanel2.setBackground(new java.awt.Color(255, 255, 255));
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);

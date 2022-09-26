@@ -5,6 +5,7 @@
  */
 package views;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Image;
@@ -75,7 +76,7 @@ public class VKelolaHutang extends javax.swing.JFrame {
         Toolkit kit = Toolkit.getDefaultToolkit();
         Image img = kit.createImage(vKasir.getLogo());
         setIconImage(img);
-        
+      
         this.selectedRowId = "0";
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -101,7 +102,11 @@ public class VKelolaHutang extends javax.swing.JFrame {
                 .get(Calendar.YEAR));
 
         initFilter();
-
+        
+        //        set color
+        jPanel2.setBackground(
+                Color.decode(vKasir.getAppConfig().getConfig("APP_MAIN_COLOR")));
+        
         this.setTitle(vKasir.getAppConfig()
                 .getConfig("APP_NAME")+" - Kelola Hutang");
 
@@ -281,13 +286,12 @@ public class VKelolaHutang extends javax.swing.JFrame {
         jLabel8 = new javax.swing.JLabel();
         cbBulan = new javax.swing.JComboBox<>();
         cbTahun = new javax.swing.JComboBox<>();
-        jbCetak = new javax.swing.JButton();
         jbCetak1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
 
-        jPanel2.setBackground(new java.awt.Color(0, 204, 0));
+        jPanel2.setBackground(new java.awt.Color(255, 255, 255));
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -319,19 +323,6 @@ public class VKelolaHutang extends javax.swing.JFrame {
 
         cbTahun.setMaximumSize(new java.awt.Dimension(49, 22));
 
-        jbCetak.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jbCetak.setText("EXCEL");
-        jbCetak.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jbCetakMouseClicked(evt);
-            }
-        });
-        jbCetak.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jbCetakActionPerformed(evt);
-            }
-        });
-
         jbCetak1.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         jbCetak1.setText("BAYAR");
         jbCetak1.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -359,11 +350,9 @@ public class VKelolaHutang extends javax.swing.JFrame {
                         .addComponent(cbBulan, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cbTahun, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(51, 51, 51)
-                        .addComponent(jbCetak, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jbCetak1, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jbCetak1, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(98, 98, 98)
                         .addComponent(jLabel8)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -378,7 +367,6 @@ public class VKelolaHutang extends javax.swing.JFrame {
                     .addComponent(jLabel8)
                     .addComponent(cbBulan, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(cbTahun, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jbCetak)
                     .addComponent(jbCetak1))
                 .addGap(9, 9, 9)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 377, Short.MAX_VALUE)
@@ -402,80 +390,6 @@ public class VKelolaHutang extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void jbCetakMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jbCetakMouseClicked
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jbCetakMouseClicked
-
-    private void jbCetakActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbCetakActionPerformed
-        // TODO add your handling code here:
-        JFileChooser excelFileChooser = new JFileChooser();
-        excelFileChooser.setDialogTitle("Simpan Sebagai");
-        FileNameExtensionFilter fnef
-                = new FileNameExtensionFilter("EXCEL FILES", "xls", "xlsx");
-        
-        excelFileChooser.setSelectedFile(
-                new File("Report-Warung Satwa-"
-                        +String.format("%02d", currMonth)+"-"+currYear));
-        excelFileChooser.setFileFilter(fnef);
-        int excelChooser = excelFileChooser.showSaveDialog(null);
-
-        FileOutputStream excelFOU = null;
-        BufferedOutputStream excelBOS = null;
-        XSSFWorkbook excelJTableExporter = null;
-
-        if (excelChooser == JFileChooser.APPROVE_OPTION) {
-            excelJTableExporter = new XSSFWorkbook();
-            XSSFSheet excelSheet = 
-                    excelJTableExporter.createSheet("Laporan Bulanan");
-
-//            Header
-            XSSFRow excelRowHeader = excelSheet.createRow(0);
-            excelRowHeader.createCell(0).setCellValue("ID");
-            excelRowHeader.createCell(1).setCellValue("TANGGAL");
-            excelRowHeader.createCell(2).setCellValue("NAMA");
-            excelRowHeader.createCell(3).setCellValue("TOTAL TRANSAKSI");
-            excelRowHeader.createCell(4).setCellValue("HUTANG");
-
-            for (int i = 1; i < model.getRowCount() + 1; i++) {
-                XSSFRow excelRow = excelSheet.createRow(i);
-                for (int j = 0; j < model.getColumnCount(); j++) {
-                    int imin1 = i-1;
-                    excelRow.createCell(0).setCellValue(model.getValueAt(imin1, 4).toString());
-                    excelRow.createCell(1).setCellValue(model.getValueAt(imin1, 0).toString());
-                    excelRow.createCell(2).setCellValue(model.getValueAt(imin1, 1).toString());
-                    excelRow.createCell(3).setCellValue(model.getValueAt(imin1, 2).toString());
-                    excelRow.createCell(4).setCellValue(model.getValueAt(imin1, 3).toString());
-                }
-            }
-
-            try {
-                excelFOU = new FileOutputStream(
-                        excelFileChooser.getSelectedFile() + ".xlsx");
-
-//                excelBOS = new BufferedOutputStream(excelFOU);
-                excelJTableExporter.write(excelFOU);
-                JOptionPane.showMessageDialog(null, "Berhasil export Excel!");
-            } catch (FileNotFoundException ex) {
-                log.error(ex.getStackTrace());
-            } catch (IOException ex) {
-                log.error(ex.getStackTrace());
-            } finally {
-                try {
-                    if (excelFOU != null) {
-                        excelFOU.close();
-                    }
-
-//                    if (excelBOS != null) {
-//                        excelBOS.close();
-//                    }
-                    excelJTableExporter.close();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            }
-        }
-    }//GEN-LAST:event_jbCetakActionPerformed
 
     private void jbCetak1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jbCetak1MouseClicked
         // TODO add your handling code here:
@@ -597,7 +511,6 @@ public class VKelolaHutang extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextField jSearch;
-    private javax.swing.JButton jbCetak;
     private javax.swing.JButton jbCetak1;
     private javax.swing.JTable jtBarang;
     // End of variables declaration//GEN-END:variables

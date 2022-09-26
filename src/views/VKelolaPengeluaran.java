@@ -5,6 +5,7 @@
  */
 package views;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Image;
@@ -59,7 +60,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  *
  * @author Chandra
  */
-public class VKelolaHutang extends javax.swing.JFrame {
+public class VKelolaPengeluaran extends javax.swing.JFrame {
 
     /**
      * Creates new form VKasir
@@ -69,13 +70,13 @@ public class VKelolaHutang extends javax.swing.JFrame {
     private String selectedRowId;
     private int currMonth;
     private String currYear;
-    private final static Logger log = LogManager.getLogger(VKelolaHutang.class);
+    private final static Logger log = LogManager.getLogger(VKelolaPengeluaran.class);
 
-    public VKelolaHutang() {
+    public VKelolaPengeluaran() {
         Toolkit kit = Toolkit.getDefaultToolkit();
         Image img = kit.createImage(vKasir.getLogo());
         setIconImage(img);
-        
+      
         this.selectedRowId = "0";
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -85,13 +86,13 @@ public class VKelolaHutang extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(VKelolaHutang.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(VKelolaPengeluaran.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(VKelolaHutang.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(VKelolaPengeluaran.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(VKelolaHutang.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(VKelolaPengeluaran.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(VKelolaHutang.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(VKelolaPengeluaran.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
 
         initComponents();
@@ -101,30 +102,33 @@ public class VKelolaHutang extends javax.swing.JFrame {
                 .get(Calendar.YEAR));
 
         initFilter();
-
+        
+        //        set color
+        jPanel2.setBackground(
+                Color.decode(vKasir.getAppConfig().getConfig("APP_MAIN_COLOR")));
+        
         this.setTitle(vKasir.getAppConfig()
-                .getConfig("APP_NAME")+" - Kelola Hutang");
+                .getConfig("APP_NAME")+" - Kelola Pengeluaran");
 
 //        table
         model = new DefaultTableModel();
         jtBarang.setModel(model);
         model.addColumn("TGL TRANSAKSI");
-        model.addColumn("PELANGGAN");
+        model.addColumn("PENGELUARAN");
         model.addColumn("TOTAL (Rp.)");
-        model.addColumn("MASIH HUTANG");
         model.addColumn("ACTION");
 
-        jtBarang.getColumnModel().getColumn(4).setMinWidth(0);
-        jtBarang.getColumnModel().getColumn(4).setMaxWidth(0);
-        jtBarang.getColumnModel().getColumn(4).setWidth(0);
+        jtBarang.getColumnModel().getColumn(3).setMinWidth(0);
+        jtBarang.getColumnModel().getColumn(3).setMaxWidth(0);
+        jtBarang.getColumnModel().getColumn(3).setWidth(0);
 
 //        set align
         DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         rightRenderer.setHorizontalAlignment(JLabel.RIGHT);
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-        jtBarang.getColumnModel().getColumn(2).setCellRenderer(rightRenderer);
-        jtBarang.getColumnModel().getColumn(3).setCellRenderer(centerRenderer);
+//        jtBarang.getColumnModel().getColumn(2).setCellRenderer(rightRenderer);
+        jtBarang.getColumnModel().getColumn(2).setCellRenderer(centerRenderer);
 //        getData("");
 
 //        set event ke search bar
@@ -163,7 +167,7 @@ public class VKelolaHutang extends javax.swing.JFrame {
             @Override
             public void mousePressed(MouseEvent e) {
                 String selectedCellValue = (String) jtBarang.getValueAt(
-                        jtBarang.getSelectedRow(), 4);
+                        jtBarang.getSelectedRow(), 3);
                 System.out.println(selectedCellValue);
 
 //                set id selected
@@ -221,41 +225,29 @@ public class VKelolaHutang extends javax.swing.JFrame {
             java.sql.ResultSet rs;
             java.sql.Connection conn = vKasir.getDBConn();
             java.sql.PreparedStatement ps = conn.prepareStatement("SELECT "
-                    + "id, pelanggan, total, is_hutang, created_at, uang_diserahkan"
-                    + " FROM transaksi"
-                    + " WHERE MONTH(created_at) = " + this.currMonth + " "
-                    + " AND YEAR(created_at) = '" + this.currYear + "'"
-                                + " AND is_hutang = 1"
+                    + "id, keterangan, total, tgl_transaksi"
+                    + " FROM pengeluaran"
+                    + " WHERE MONTH(tgl_transaksi) = " + this.currMonth + " "
+                    + " AND YEAR(tgl_transaksi) = '" + this.currYear + "'"
             );
             rs = ps.executeQuery();
 
             models.ItemBarang ib;
 
             while (rs.next()) {
-                Object[] obj = new Object[5];
-                String oldstring = rs.getString("created_at");
+                Object[] obj = new Object[4];
+                String oldstring = rs.getString("tgl_transaksi");
                 Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
                         .parse(oldstring);
-                String tanggal = new SimpleDateFormat("EEEE, dd-MMM-yyyy HH:mm",
+                String tanggal = new SimpleDateFormat("EEEE, dd-MMM-yyyy",
                         vKasir.getAppLocale()).format(date);
                 obj[0] = tanggal;
-                obj[1] = rs.getString("pelanggan");
+                obj[1] = rs.getString("keterangan");
 
                 obj[2] = String.format(vKasir.getAppLocale(), "%,.0f",
                         Double.parseDouble(rs.getString("total")));
-                String hutang = "TIDAK";
                 
-                if(rs.getString("is_hutang").equalsIgnoreCase("1")){
-                    hutang = "YA ";
-                    String hutangJml = String.format(vKasir.getAppLocale(), "%,.0f",
-                        Double.parseDouble(rs.getString("total")) -
-                        Double.parseDouble(rs.getString("uang_diserahkan")));
-                    
-                    hutang += "("+hutangJml+")";
-                }
-                
-                obj[3] = hutang;
-                obj[4] = rs.getString("id");
+                obj[3] = rs.getString("id");
 
                 model.addRow(obj);
             }
@@ -281,13 +273,14 @@ public class VKelolaHutang extends javax.swing.JFrame {
         jLabel8 = new javax.swing.JLabel();
         cbBulan = new javax.swing.JComboBox<>();
         cbTahun = new javax.swing.JComboBox<>();
-        jbCetak = new javax.swing.JButton();
-        jbCetak1 = new javax.swing.JButton();
+        jbTambah = new javax.swing.JButton();
+        jbEdit = new javax.swing.JButton();
+        jbHapus = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
 
-        jPanel2.setBackground(new java.awt.Color(0, 204, 0));
+        jPanel2.setBackground(new java.awt.Color(255, 255, 255));
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -319,29 +312,42 @@ public class VKelolaHutang extends javax.swing.JFrame {
 
         cbTahun.setMaximumSize(new java.awt.Dimension(49, 22));
 
-        jbCetak.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jbCetak.setText("EXCEL");
-        jbCetak.addMouseListener(new java.awt.event.MouseAdapter() {
+        jbTambah.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        jbTambah.setText("TAMBAH");
+        jbTambah.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jbCetakMouseClicked(evt);
+                jbTambahMouseClicked(evt);
             }
         });
-        jbCetak.addActionListener(new java.awt.event.ActionListener() {
+        jbTambah.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jbCetakActionPerformed(evt);
+                jbTambahActionPerformed(evt);
             }
         });
 
-        jbCetak1.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jbCetak1.setText("BAYAR");
-        jbCetak1.addMouseListener(new java.awt.event.MouseAdapter() {
+        jbEdit.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        jbEdit.setText("EDIT");
+        jbEdit.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jbCetak1MouseClicked(evt);
+                jbEditMouseClicked(evt);
             }
         });
-        jbCetak1.addActionListener(new java.awt.event.ActionListener() {
+        jbEdit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jbCetak1ActionPerformed(evt);
+                jbEditActionPerformed(evt);
+            }
+        });
+
+        jbHapus.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        jbHapus.setText("HAPUS");
+        jbHapus.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jbHapusMouseClicked(evt);
+            }
+        });
+        jbHapus.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbHapusActionPerformed(evt);
             }
         });
 
@@ -352,18 +358,18 @@ public class VKelolaHutang extends javax.swing.JFrame {
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 720, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(cbBulan, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cbTahun, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(51, 51, 51)
-                        .addComponent(jbCetak, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(28, 28, 28)
+                        .addComponent(jbTambah)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jbCetak1, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jbEdit)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jbHapus)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 27, Short.MAX_VALUE)
                         .addComponent(jLabel8)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -378,8 +384,9 @@ public class VKelolaHutang extends javax.swing.JFrame {
                     .addComponent(jLabel8)
                     .addComponent(cbBulan, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(cbTahun, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jbCetak)
-                    .addComponent(jbCetak1))
+                    .addComponent(jbTambah)
+                    .addComponent(jbEdit)
+                    .addComponent(jbHapus))
                 .addGap(9, 9, 9)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 377, Short.MAX_VALUE)
                 .addContainerGap())
@@ -403,135 +410,100 @@ public class VKelolaHutang extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jbCetakMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jbCetakMouseClicked
+    private void jbTambahMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jbTambahMouseClicked
         // TODO add your handling code here:
-    }//GEN-LAST:event_jbCetakMouseClicked
+    }//GEN-LAST:event_jbTambahMouseClicked
 
-    private void jbCetakActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbCetakActionPerformed
+    private void jbTambahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbTambahActionPerformed
         // TODO add your handling code here:
-        JFileChooser excelFileChooser = new JFileChooser();
-        excelFileChooser.setDialogTitle("Simpan Sebagai");
-        FileNameExtensionFilter fnef
-                = new FileNameExtensionFilter("EXCEL FILES", "xls", "xlsx");
-        
-        excelFileChooser.setSelectedFile(
-                new File("Report-Warung Satwa-"
-                        +String.format("%02d", currMonth)+"-"+currYear));
-        excelFileChooser.setFileFilter(fnef);
-        int excelChooser = excelFileChooser.showSaveDialog(null);
-
-        FileOutputStream excelFOU = null;
-        BufferedOutputStream excelBOS = null;
-        XSSFWorkbook excelJTableExporter = null;
-
-        if (excelChooser == JFileChooser.APPROVE_OPTION) {
-            excelJTableExporter = new XSSFWorkbook();
-            XSSFSheet excelSheet = 
-                    excelJTableExporter.createSheet("Laporan Bulanan");
-
-//            Header
-            XSSFRow excelRowHeader = excelSheet.createRow(0);
-            excelRowHeader.createCell(0).setCellValue("ID");
-            excelRowHeader.createCell(1).setCellValue("TANGGAL");
-            excelRowHeader.createCell(2).setCellValue("NAMA");
-            excelRowHeader.createCell(3).setCellValue("TOTAL TRANSAKSI");
-            excelRowHeader.createCell(4).setCellValue("HUTANG");
-
-            for (int i = 1; i < model.getRowCount() + 1; i++) {
-                XSSFRow excelRow = excelSheet.createRow(i);
-                for (int j = 0; j < model.getColumnCount(); j++) {
-                    int imin1 = i-1;
-                    excelRow.createCell(0).setCellValue(model.getValueAt(imin1, 4).toString());
-                    excelRow.createCell(1).setCellValue(model.getValueAt(imin1, 0).toString());
-                    excelRow.createCell(2).setCellValue(model.getValueAt(imin1, 1).toString());
-                    excelRow.createCell(3).setCellValue(model.getValueAt(imin1, 2).toString());
-                    excelRow.createCell(4).setCellValue(model.getValueAt(imin1, 3).toString());
-                }
-            }
-
-            try {
-                excelFOU = new FileOutputStream(
-                        excelFileChooser.getSelectedFile() + ".xlsx");
-
-//                excelBOS = new BufferedOutputStream(excelFOU);
-                excelJTableExporter.write(excelFOU);
-                JOptionPane.showMessageDialog(null, "Berhasil export Excel!");
-            } catch (FileNotFoundException ex) {
-                log.error(ex.getStackTrace());
-            } catch (IOException ex) {
-                log.error(ex.getStackTrace());
-            } finally {
-                try {
-                    if (excelFOU != null) {
-                        excelFOU.close();
-                    }
-
-//                    if (excelBOS != null) {
-//                        excelBOS.close();
-//                    }
-                    excelJTableExporter.close();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            }
+        VKelolaPengeluaranForm kelolaPengeluaran = vKasir.getKelolaPengeluaranForm();
+        if (!kelolaPengeluaran.isVisible()) {
+            kelolaPengeluaran.pack();
+            kelolaPengeluaran.setLocationRelativeTo(null);
+            kelolaPengeluaran.setVisible(true);
+            kelolaPengeluaran.setDefaultCloseOperation(VKelolaBarangForm.DISPOSE_ON_CLOSE);
         }
-    }//GEN-LAST:event_jbCetakActionPerformed
+    }//GEN-LAST:event_jbTambahActionPerformed
 
-    private void jbCetak1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jbCetak1MouseClicked
+    private void jbEditMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jbEditMouseClicked
         // TODO add your handling code here:
-    }//GEN-LAST:event_jbCetak1MouseClicked
+    }//GEN-LAST:event_jbEditMouseClicked
 
-    private void jbCetak1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbCetak1ActionPerformed
+    private void jbEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbEditActionPerformed
         // TODO add your handling code here:
-        VKelolaHutangForm kelolaHutang = vKasir.getFormHutang();
-        if (!kelolaHutang.isVisible()) {
-            kelolaHutang.pack();
-            kelolaHutang.setLocationRelativeTo(null);
-            kelolaHutang.setVisible(true);
-            kelolaHutang.setDefaultCloseOperation(VKelolaBarangForm.DISPOSE_ON_CLOSE);
-
-//            get data
+        VKelolaPengeluaranForm kelolaPengeluaran = vKasir.getKelolaPengeluaranForm();
+        if (!kelolaPengeluaran.isVisible()) {
+            kelolaPengeluaran.pack();
+            kelolaPengeluaran.setLocationRelativeTo(null);
+            kelolaPengeluaran.setVisible(true);
+            kelolaPengeluaran.setDefaultCloseOperation(VKelolaBarangForm.DISPOSE_ON_CLOSE);
+            
+            kelolaPengeluaran.setType(2);
+            
+            //            get data
             try {
                 java.sql.ResultSet rs;
                 java.sql.Connection conn = vKasir.getDBConn();
                 java.sql.PreparedStatement ps = conn.prepareStatement("SELECT "
-                        + "id, pelanggan, total, uang_diserahkan"
-                        + " FROM transaksi"
-                        + " WHERE transaksi.id = '" + this.selectedRowId + "' "
+                        + "id, keterangan, total, tgl_transaksi"
+                        + " FROM pengeluaran"
+                        + " WHERE pengeluaran.id = '" + this.selectedRowId + "' "
                 );
                 rs = ps.executeQuery();
 
                 while (rs.next()) {
-                    String hutangJml = String.format("%.0f",
-                        Double.parseDouble(rs.getString("total")) -
-                        Double.parseDouble(rs.getString("uang_diserahkan")));;
-                        
-                    kelolaHutang.setTfNamaBarang(rs.getString("pelanggan"));
-                    kelolaHutang.setTfHargaJual(hutangJml);
+                    models.ItemBarang ib;
+
+                    kelolaPengeluaran.setTfKeterangan(rs.getString("keterangan"));
+                    kelolaPengeluaran.setTfTotal(rs.getString("total"));
+                    kelolaPengeluaran.setjdcTanggal(rs.getString("tgl_transaksi"));
                 }
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(null, "ERROR load data " + e.getMessage());
             }
         }
-    }//GEN-LAST:event_jbCetak1ActionPerformed
+    }//GEN-LAST:event_jbEditActionPerformed
+
+    private void jbHapusMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jbHapusMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jbHapusMouseClicked
+
+    private void jbHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbHapusActionPerformed
+        try {
+            // TODO add your handling code here:
+            this.deleteData();
+        } catch (ParseException ex) {
+            ex.printStackTrace();
+        }
+    }//GEN-LAST:event_jbHapusActionPerformed
 
 //    method delete
     private void deleteData() throws ParseException {
         try {
+            int n = JOptionPane.showConfirmDialog(
+                            null, "Apakah Anda yakin ingin menghapus data pengeluaran ini?",
+                            "Hapus Pengeluaran",
+                            JOptionPane.YES_NO_OPTION);
+            
+            if (n == JOptionPane.NO_OPTION) {
+                return;
+            }
+            
             String sId = this.selectedRowId;
             if (sId == "0") {
                 JOptionPane.showMessageDialog(null, "Silahkan pilih data terlebih dahulu!");
             } else {
                 java.sql.Connection conn = vKasir.getDBConn();
-                java.sql.PreparedStatement ps = conn.prepareStatement("UPDATE "
-                        + " barang"
-                        + " SET deleted_at = NOW()"
+                java.sql.PreparedStatement ps = conn.prepareStatement("DELETE FROM"
+                        + " pengeluaran"
                         + " WHERE id = '" + this.selectedRowId + "' "
                 );
                 ps.executeUpdate();
 
                 jSearch.setText("");
                 getData("");
+                
+                JOptionPane.showMessageDialog(null, "Berhasil menghapus data");
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "ERROR load data " + e.getMessage());
@@ -597,8 +569,9 @@ public class VKelolaHutang extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextField jSearch;
-    private javax.swing.JButton jbCetak;
-    private javax.swing.JButton jbCetak1;
+    private javax.swing.JButton jbEdit;
+    private javax.swing.JButton jbHapus;
+    private javax.swing.JButton jbTambah;
     private javax.swing.JTable jtBarang;
     // End of variables declaration//GEN-END:variables
 }
