@@ -80,7 +80,7 @@
                           <Component id="cbBulan" min="-2" pref="120" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="cbTahun" min="-2" pref="100" max="-2" attributes="0"/>
-                          <EmptySpace min="-2" pref="51" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
                           <Component id="jbCetak" min="-2" pref="75" max="-2" attributes="0"/>
                           <EmptySpace max="32767" attributes="0"/>
                           <Component id="jLabel8" min="-2" max="-2" attributes="0"/>

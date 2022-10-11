@@ -422,6 +422,8 @@ public class VKelolaPengeluaran extends javax.swing.JFrame {
             kelolaPengeluaran.setLocationRelativeTo(null);
             kelolaPengeluaran.setVisible(true);
             kelolaPengeluaran.setDefaultCloseOperation(VKelolaBarangForm.DISPOSE_ON_CLOSE);
+            
+            kelolaPengeluaran.setType(1);
         }
     }//GEN-LAST:event_jbTambahActionPerformed
 

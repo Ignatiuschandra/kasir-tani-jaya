@@ -13,9 +13,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,17 +24,18 @@ import models.ItemBarang;
  *
  * @author Chandra
  */
-public class VKelolaPengeluaranForm extends javax.swing.JFrame {
+public class VGantiPassword extends javax.swing.JFrame {
 
     VKasir vKasir = VKasir.getInstance();
     private String satuanId;
+    private String userId;
     private int tipeForm;
     private Map<String, String> map;
 
     /**
      * Creates new form VKasir
      */
-    public VKelolaPengeluaranForm(int type) {
+    public VGantiPassword() {
         Toolkit kit = Toolkit.getDefaultToolkit();
         Image img = kit.createImage(vKasir.getLogo());
         setIconImage(img);
@@ -63,10 +62,9 @@ public class VKelolaPengeluaranForm extends javax.swing.JFrame {
         jPanel2.setBackground(
                 Color.decode(vKasir.getAppConfig().getConfig("APP_MAIN_COLOR")));
 
-        this.tipeForm = type;
+        this.setTitle(vKasir.getAppConfig()
+                .getConfig("APP_NAME") + " - Ganti Password");
 
-        setType(tipeForm);
-        jdcTanggal.setDateFormatString("dd MMMM yyyy");
     }
 
     /**
@@ -80,13 +78,13 @@ public class VKelolaPengeluaranForm extends javax.swing.JFrame {
 
         jPanel2 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        jlHargaBeli = new javax.swing.JLabel();
-        tfPengeluaran = new javax.swing.JTextField();
+        jLabel2 = new javax.swing.JLabel();
         jbTombol = new javax.swing.JButton();
-        tfKeterangan = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
-        jdcTanggal = new com.toedter.calendar.JDateChooser();
+        jLabel5 = new javax.swing.JLabel();
+        jpfPassword2 = new javax.swing.JPasswordField();
+        jpfPasswordConfirm = new javax.swing.JPasswordField();
+        jpfPassword1 = new javax.swing.JPasswordField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
@@ -106,31 +104,22 @@ public class VKelolaPengeluaranForm extends javax.swing.JFrame {
 
         jPanel3.setBackground(new java.awt.Color(204, 204, 204));
 
-        jLabel1.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jLabel1.setText("TGL TRANSAKSI");
-
-        jlHargaBeli.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jlHargaBeli.setText("PENGELUARAN (Rp.)");
-
-        tfPengeluaran.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jLabel2.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        jLabel2.setText("KONFIRMASI PASSWORD BARU");
 
         jbTombol.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jbTombol.setText("TAMBAH");
+        jbTombol.setText("GANTI PASSWORD");
         jbTombol.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jbTombolMouseClicked(evt);
             }
         });
-        jbTombol.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jbTombolActionPerformed(evt);
-            }
-        });
-
-        tfKeterangan.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
 
         jLabel4.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jLabel4.setText("KETERANGAN PENGELUARAN");
+        jLabel4.setText("PASSWORD BARU");
+
+        jLabel5.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        jLabel5.setText("PASSWORD LAMA");
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -138,34 +127,39 @@ public class VKelolaPengeluaranForm extends javax.swing.JFrame {
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel1)
-                    .addComponent(jlHargaBeli)
-                    .addComponent(tfPengeluaran)
-                    .addComponent(jbTombol, javax.swing.GroupLayout.DEFAULT_SIZE, 255, Short.MAX_VALUE)
-                    .addComponent(jLabel4)
-                    .addComponent(tfKeterangan)
-                    .addComponent(jdcTanggal, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel4)
+                            .addComponent(jLabel5))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jpfPassword2)
+                    .addComponent(jpfPasswordConfirm)
+                    .addComponent(jpfPassword1)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jbTombol, javax.swing.GroupLayout.PREFERRED_SIZE, 255, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1)
-                .addGap(2, 2, 2)
-                .addComponent(jdcTanggal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(tfKeterangan, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jpfPassword1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jlHargaBeli)
+                .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(tfPengeluaran, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jpfPassword2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
+                .addComponent(jLabel5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jpfPasswordConfirm, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jbTombol)
-                .addContainerGap(15, Short.MAX_VALUE))
+                .addContainerGap(12, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -181,8 +175,8 @@ public class VKelolaPengeluaranForm extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, 0)
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -190,108 +184,88 @@ public class VKelolaPengeluaranForm extends javax.swing.JFrame {
 
     private void jbTombolMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jbTombolMouseClicked
         // TODO add your handling code here:
-    }//GEN-LAST:event_jbTombolMouseClicked
-
-    private void jbTombolActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbTombolActionPerformed
-        // TODO add your handling code here:
-        this.action();
-    }//GEN-LAST:event_jbTombolActionPerformed
-
-    private void action() {
         try {
-            VKelolaPengeluaran vKelolaPengeluaran = vKasir.getKelolaPengeluaran();
+            VKelolaUser vKelolaUser = vKasir.getKelolaUser();
+            String idLogin = vKasir.getAuthEncryptor().getIdLogin();
 
-            SimpleDateFormat dcn = new SimpleDateFormat("yyyy-MM-dd");
-            String tgl_transaksi = dcn.format(jdcTanggal.getDate());
+//            cek password user login dulu
+            String passwd = new String(jpfPasswordConfirm.getPassword());
+            String encryptedPasswd
+                    = vKasir.getAuthEncryptor().hashPassword(passwd);
 
-            if (this.tipeForm == 1) { //tambah
-//                 buat ID untuk transaksi
-                Calendar calendar = Calendar.getInstance();
-                String idTrx = "TRXP" + calendar.getTimeInMillis();
+            String userPassPlain = new String(jpfPassword1.getPassword());
+            String userPass = vKasir.getAuthEncryptor().hashPassword(
+                    userPassPlain);
 
-                String sql
-                        = "insert into pengeluaran "
-                        + "(id, keterangan, total, user_id, tgl_transaksi) values('"
-                        + idTrx
-                        + "','" + tfKeterangan.getText()
-                        + "'," + Integer.parseInt(tfPengeluaran.getText())
-                        + "," + vKasir.getAuthEncryptor().getIdLogin()
-                        + ",'" + tgl_transaksi + "')";
-                
-                System.out.println(sql);
+            java.sql.ResultSet rs;
+            java.sql.Connection connCheck = vKasir.getDBConn();
+            java.sql.PreparedStatement psCheck;
 
-                java.sql.Connection conn = vKasir.getDBConn();
-                java.sql.PreparedStatement pst = conn.prepareStatement(sql);
-                pst.execute();
-            } else {
-                java.sql.Connection conn = vKasir.getDBConn();
-                java.sql.PreparedStatement ps = conn.prepareStatement("UPDATE "
-                        + " pengeluaran SET"
-                        + " keterangan = '" + tfKeterangan.getText() + "'"
-                        + ", total = " + Integer.parseInt(tfPengeluaran.getText()) + ""
-                        + ", user_id = " + vKasir.getAuthEncryptor().getIdLogin() + ""
-                        + ", tgl_transaksi = '" + tgl_transaksi + "'"
-                        + " WHERE id = '" + vKelolaPengeluaran.getSelectedRowId() + "' "
-                );
-                ps.executeUpdate();
+            psCheck = connCheck.prepareStatement("SELECT "
+                    + "id, username, password, nama"
+                    + " FROM user"
+                    + " WHERE user.id = '" + idLogin + "' "
+            );
+            rs = psCheck.executeQuery();
+
+            boolean isPass = false;
+            while (rs.next()) {
+                if (vKasir.getAuthEncryptor().checkPassword(
+                        passwd, rs.getString("password"))) {
+                    isPass = true;
+                }
             }
 
-            tfKeterangan.setText("");
-            tfPengeluaran.setText("");
-            jdcTanggal.setCalendar(null);
-            vKelolaPengeluaran.getData("");
+            if (!isPass) {
+                JOptionPane.showMessageDialog(null, "Maaf, Password Konfirmasi "
+                        + "SALAH! Mohon ulangi kembali");
+                return;
+            }
+
+            java.sql.Connection conn = vKasir.getDBConn();
+            java.sql.PreparedStatement ps;
+            ps = conn.prepareStatement("UPDATE "
+                    + " user"
+                    + " SET password = '" + userPass + "'"
+                    + " WHERE id = '" + vKasir.getAuthEncryptor().getIdLogin() + "' "
+            );
+
+            ps.executeUpdate();
+
+            jpfPassword1.setText("");
+            jpfPassword2.setText("");
+            jpfPasswordConfirm.setText("");
             this.setVisible(false);
-            JOptionPane.showMessageDialog(null, "Berhasil disimpan");
-
+            JOptionPane.showMessageDialog(null, "Berhasil ganti Password");
         } catch (SQLException | HeadlessException e) {
-            JOptionPane.showMessageDialog(null, e);
-        } catch (ParseException ex) {
-            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Gagal menyimpan data : " + e);
         }
-    }
+    }//GEN-LAST:event_jbTombolMouseClicked
 
-    public void setTfKeterangan(String text) {
-        tfKeterangan.setText(text);
-    }
-
-    public void setTfTotal(String text) {
-        double d = Double.parseDouble(text);
-        int i = (int)d;  
-        tfPengeluaran.setText(Integer.toString(i));
-    }
-    
-    public void setjdcTanggal(String text) {
-   java.util.Date date2;
-        try {
-            date2 = new SimpleDateFormat("yyyy-MM-dd").parse(text);
-            jdcTanggal.setDate(date2);
-        } catch (ParseException ex) {
-            ex.printStackTrace();
-        }
+    public void setUserId(String text) {
+        this.userId = text;
     }
 
     public void setType(int type) {
         this.tipeForm = type;
         if (type == 1) {
-            this.setTitle(vKasir.getAppConfig()
-                    .getConfig("APP_NAME") + " - Tambah Barang");
+            this.setTitle("TANI JAYA - Tambah User");
             jbTombol.setText("TAMBAH");
         } else {
-            this.setTitle(vKasir.getAppConfig()
-                    .getConfig("APP_NAME") + " - Edit Barang");
+            this.setTitle("TANI JAYA - Edit User");
             jbTombol.setText("UPDATE");
         }
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JButton jbTombol;
-    private com.toedter.calendar.JDateChooser jdcTanggal;
-    private javax.swing.JLabel jlHargaBeli;
-    private javax.swing.JTextField tfKeterangan;
-    private javax.swing.JTextField tfPengeluaran;
+    private javax.swing.JPasswordField jpfPassword1;
+    private javax.swing.JPasswordField jpfPassword2;
+    private javax.swing.JPasswordField jpfPasswordConfirm;
     // End of variables declaration//GEN-END:variables
 }

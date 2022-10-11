@@ -76,7 +76,7 @@ public class VReportTransaksi extends javax.swing.JFrame {
         Toolkit kit = Toolkit.getDefaultToolkit();
         Image img = kit.createImage(vKasir.getLogo());
         setIconImage(img);
-        
+
         this.selectedRowId = "0";
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -104,8 +104,8 @@ public class VReportTransaksi extends javax.swing.JFrame {
         initFilter();
 
         this.setTitle(vKasir.getAppConfig()
-                .getConfig("APP_NAME")+" - Rekap Penjualan");
-        
+                .getConfig("APP_NAME") + " - Rekap Transaksi");
+
         //        set color
         jPanel2.setBackground(
                 Color.decode(vKasir.getAppConfig().getConfig("APP_MAIN_COLOR")));
@@ -114,14 +114,15 @@ public class VReportTransaksi extends javax.swing.JFrame {
         model = new DefaultTableModel();
         jtBarang.setModel(model);
         model.addColumn("TGL TRANSAKSI");
-        model.addColumn("PELANGGAN");
-        model.addColumn("TOTAL (Rp.)");
+        model.addColumn("PARTISIPAN");
+        model.addColumn("PENGELUARAN (Rp.)");
+        model.addColumn("PEMASUKAN (Rp.)");
         model.addColumn("MASIH HUTANG");
         model.addColumn("ACTION");
 
-        jtBarang.getColumnModel().getColumn(4).setMinWidth(0);
-        jtBarang.getColumnModel().getColumn(4).setMaxWidth(0);
-        jtBarang.getColumnModel().getColumn(4).setWidth(0);
+        jtBarang.getColumnModel().getColumn(5).setMinWidth(0);
+        jtBarang.getColumnModel().getColumn(5).setMaxWidth(0);
+        jtBarang.getColumnModel().getColumn(5).setWidth(0);
 
 //        set align
         DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
@@ -129,7 +130,8 @@ public class VReportTransaksi extends javax.swing.JFrame {
         rightRenderer.setHorizontalAlignment(JLabel.RIGHT);
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
         jtBarang.getColumnModel().getColumn(2).setCellRenderer(rightRenderer);
-        jtBarang.getColumnModel().getColumn(3).setCellRenderer(centerRenderer);
+        jtBarang.getColumnModel().getColumn(3).setCellRenderer(rightRenderer);
+        jtBarang.getColumnModel().getColumn(4).setCellRenderer(centerRenderer);
 //        getData("");
 
 //        set event ke search bar
@@ -225,45 +227,84 @@ public class VReportTransaksi extends javax.swing.JFrame {
         try {
             java.sql.ResultSet rs;
             java.sql.Connection conn = vKasir.getDBConn();
-            java.sql.PreparedStatement ps = conn.prepareStatement("SELECT "
-                    + "id, pelanggan, total, is_hutang, created_at, uang_diserahkan"
+            java.sql.PreparedStatement ps = conn.prepareStatement("(SELECT "
+                    + "id, pelanggan, total, is_hutang, created_at,"
+                    + " uang_diserahkan, '1' as is_pemasukan"
                     + " FROM transaksi"
                     + " WHERE MONTH(created_at) = " + this.currMonth + " "
-                    + " AND YEAR(created_at) = '" + this.currYear + "'"
-            //                    + " AND deleted_at IS NULL "
+                    + " AND YEAR(created_at) = '" + this.currYear + "')"
+                    + "UNION"
+                    + "(SELECT "
+                    + "pengeluaran.id, nama as pelanggan, total,"
+                    + " '0' as is_hutang, tgl_transaksi as created_at,"
+                    + " '0' as uang_diserahkan, '0' as is_pemasukan"
+                    + " FROM pengeluaran"
+                    + " LEFT JOIN user ON user_id = user.id"
+                    + " WHERE MONTH(tgl_transaksi) = " + this.currMonth + " "
+                    + " AND YEAR(tgl_transaksi) = '" + this.currYear + "')"
+                    + " ORDER BY created_at DESC"
             );
             rs = ps.executeQuery();
 
             models.ItemBarang ib;
+            Double pemasukan = 0.0;
+            Double pengeluaran = 0.0;
 
             while (rs.next()) {
-                Object[] obj = new Object[5];
+                Object[] obj = new Object[6];
                 String oldstring = rs.getString("created_at");
                 Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
                         .parse(oldstring);
-                String tanggal = new SimpleDateFormat("EEEE, dd-MMM-yyyy HH:mm",
+                String tanggal = new SimpleDateFormat("EEEE, dd-MMM-yyyy",
                         vKasir.getAppLocale()).format(date);
                 obj[0] = tanggal;
                 obj[1] = rs.getString("pelanggan");
 
-                obj[2] = String.format(vKasir.getAppLocale(), "%,.0f",
-                        Double.parseDouble(rs.getString("total")));
+                if (rs.getString("is_pemasukan").equalsIgnoreCase("0")) {
+                    pengeluaran += Double.parseDouble(rs.getString("total"));
+                    obj[2] = String.format(vKasir.getAppLocale(), "%,.0f",
+                            Double.parseDouble(rs.getString("total")));
+                    obj[3] = "0";
+                } else {
+                    pemasukan += Double.parseDouble(rs.getString("total"));
+                    obj[2] = "0";
+                    obj[3] = String.format(vKasir.getAppLocale(), "%,.0f",
+                            Double.parseDouble(rs.getString("total")));
+                }
+
                 String hutang = "TIDAK";
-                
-                if(rs.getString("is_hutang").equalsIgnoreCase("1")){
+
+                if (rs.getString("is_hutang").equalsIgnoreCase("1")) {
                     hutang = "YA ";
                     String hutangJml = String.format(vKasir.getAppLocale(), "%,.0f",
-                        Double.parseDouble(rs.getString("total")) -
-                        Double.parseDouble(rs.getString("uang_diserahkan")));;
-                    
-                    hutang += "("+hutangJml+")";
+                            Double.parseDouble(rs.getString("total"))
+                            - Double.parseDouble(rs.getString("uang_diserahkan")));;
+
+                    hutang += "(" + hutangJml + ")";
                 }
-                
-                obj[3] = hutang;
-                obj[4] = rs.getString("id");
+
+                obj[4] = hutang;
+                obj[5] = rs.getString("id");
 
                 model.addRow(obj);
             }
+
+            if (pengeluaran != 0.0 && pemasukan != 0.0) {
+                Object[] obj = new Object[6];
+                obj[1] = "Total Transaksi (Rp.)";
+                obj[2] = String.format(vKasir.getAppLocale(), "%,.0f", pengeluaran);
+                obj[3] = String.format(vKasir.getAppLocale(), "%,.0f", pemasukan);
+
+                model.addRow(obj);
+
+                obj = new Object[6];
+                obj[1] = "Net Profit (Rp.)";
+                obj[3] = String.format(vKasir.getAppLocale(), "%,.0f",
+                        pemasukan - pengeluaran);
+
+                model.addRow(obj);
+            }
+
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "ERROR load data " + e.getMessage());
         }
@@ -350,7 +391,7 @@ public class VReportTransaksi extends javax.swing.JFrame {
                         .addComponent(cbBulan, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cbTahun, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(51, 51, 51)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jbCetak, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabel8)
@@ -401,10 +442,10 @@ public class VReportTransaksi extends javax.swing.JFrame {
         excelFileChooser.setDialogTitle("Simpan Sebagai");
         FileNameExtensionFilter fnef
                 = new FileNameExtensionFilter("EXCEL FILES", "xls", "xlsx");
-        
+
         excelFileChooser.setSelectedFile(
                 new File("Report-Warung Satwa-"
-                        +String.format("%02d", currMonth)+"-"+currYear));
+                        + String.format("%02d", currMonth) + "-" + currYear));
         excelFileChooser.setFileFilter(fnef);
         int excelChooser = excelFileChooser.showSaveDialog(null);
 
@@ -414,26 +455,32 @@ public class VReportTransaksi extends javax.swing.JFrame {
 
         if (excelChooser == JFileChooser.APPROVE_OPTION) {
             excelJTableExporter = new XSSFWorkbook();
-            XSSFSheet excelSheet = 
-                    excelJTableExporter.createSheet("Laporan Bulanan");
+            XSSFSheet excelSheet
+                    = excelJTableExporter.createSheet("Laporan Bulanan");
 
 //            Header
             XSSFRow excelRowHeader = excelSheet.createRow(0);
             excelRowHeader.createCell(0).setCellValue("ID");
             excelRowHeader.createCell(1).setCellValue("TANGGAL");
-            excelRowHeader.createCell(2).setCellValue("NAMA");
-            excelRowHeader.createCell(3).setCellValue("TOTAL TRANSAKSI");
-            excelRowHeader.createCell(4).setCellValue("HUTANG");
+            excelRowHeader.createCell(2).setCellValue("PARTISIPAN");
+            excelRowHeader.createCell(3).setCellValue("PENGELUARAN");
+            excelRowHeader.createCell(4).setCellValue("PEMASUKAN");
+            excelRowHeader.createCell(5).setCellValue("HUTANG");
 
-            for (int i = 1; i < model.getRowCount() + 1; i++) {
+            for (int i = 1; i < model.getRowCount()-2 + 1; i++) { // kurang 2 untuk bansi net profit
                 XSSFRow excelRow = excelSheet.createRow(i);
                 for (int j = 0; j < model.getColumnCount(); j++) {
-                    int imin1 = i-1;
-                    excelRow.createCell(0).setCellValue(model.getValueAt(imin1, 4).toString());
+                    int imin1 = i - 1;
+                    excelRow.createCell(0).setCellValue(model.getValueAt(imin1, 5).toString());
                     excelRow.createCell(1).setCellValue(model.getValueAt(imin1, 0).toString());
                     excelRow.createCell(2).setCellValue(model.getValueAt(imin1, 1).toString());
-                    excelRow.createCell(3).setCellValue(model.getValueAt(imin1, 2).toString());
-                    excelRow.createCell(4).setCellValue(model.getValueAt(imin1, 3).toString());
+                    excelRow.createCell(3).setCellValue(
+                            Integer.parseInt(model.getValueAt(imin1, 2)
+                                    .toString().replace(".", "")));
+                    excelRow.createCell(4).setCellValue(
+                            Integer.parseInt(model.getValueAt(imin1, 3)
+                                    .toString().replace(".", "")));
+                    excelRow.createCell(5).setCellValue(model.getValueAt(imin1, 4).toString());
                 }
             }
 

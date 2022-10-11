@@ -72,6 +72,7 @@ public class VKasir extends javax.swing.JFrame {
     static VKelolaUserForm vKelolaUserForm;
     static VKelolaPengeluaran vKelolaPengeluaran;
     static VKelolaPengeluaranForm vKelolaPengeluaranForm;
+    static VGantiPassword vGantiPassword;
     static Connection conn;
     static Statement stm;
     private Map<String, String> map;
@@ -367,6 +368,7 @@ public class VKasir extends javax.swing.JFrame {
         jButton6 = new javax.swing.JButton();
         jbKelolaUser = new javax.swing.JButton();
         jButton7 = new javax.swing.JButton();
+        jbGantiPassword = new javax.swing.JButton();
         jPanel5 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         bTambah = new javax.swing.JButton();
@@ -481,6 +483,14 @@ public class VKasir extends javax.swing.JFrame {
             }
         });
 
+        jbGantiPassword.setFont(new java.awt.Font("Tahoma", 1, 16)); // NOI18N
+        jbGantiPassword.setText("GANTI PASSWORD");
+        jbGantiPassword.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbGantiPasswordActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
@@ -493,7 +503,8 @@ public class VKasir extends javax.swing.JFrame {
                     .addComponent(jButton5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jButton6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jbKelolaUser, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButton7, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jButton7, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jbGantiPassword, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel4Layout.setVerticalGroup(
@@ -510,6 +521,8 @@ public class VKasir extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jbKelolaUser, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jbGantiPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -885,8 +898,20 @@ public class VKasir extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton5ActionPerformed
 
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
-//        hide kasir
+//        hide all
         this.setVisible(false);
+        vKelolaBarang.setVisible(false);
+        vKelolaBarangForm.setVisible(false);
+        vKelolaBarangFormTambah.setVisible(false);
+        vReportTransaksi.setVisible(false);
+        vKelolaHutang.setVisible(false);
+        vKelolaHutangForm.setVisible(false);
+        vKelolaUser.setVisible(false);
+        vKelolaUserForm.setVisible(false);
+        vKelolaPengeluaran.setVisible(false);
+        vKelolaPengeluaranForm.setVisible(false);
+        vGantiPassword.setVisible(false);
+        
         vLoginForm.resetForm();
         vLoginForm.setVisible(true);
         ae.setIdLogin("");
@@ -929,6 +954,18 @@ public class VKasir extends javax.swing.JFrame {
             Logger.getLogger(VKasir.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_jButton7ActionPerformed
+
+    private void jbGantiPasswordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbGantiPasswordActionPerformed
+        // TODO add your handling code here:
+        if (!vGantiPassword.isVisible()) {
+            vGantiPassword.pack();
+            vGantiPassword.setLocationRelativeTo(null);
+            vGantiPassword.setVisible(true);
+            vGantiPassword.setDefaultCloseOperation(VReportTransaksi.DISPOSE_ON_CLOSE);
+        } else {
+            vGantiPassword.setVisible(true);
+        }
+    }//GEN-LAST:event_jbGantiPasswordActionPerformed
 
     /**
      * @param args the command line arguments
@@ -983,6 +1020,7 @@ public class VKasir extends javax.swing.JFrame {
         vKelolaUserForm = new VKelolaUserForm(1);
         vKelolaPengeluaran = new VKelolaPengeluaran();
         vKelolaPengeluaranForm = new VKelolaPengeluaranForm(1);
+        vGantiPassword = new VGantiPassword();
         
 //        System.out.println("how many : "+vKasir.getInstantiationCounter());
 
@@ -1037,6 +1075,7 @@ public class VKasir extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JButton jbGantiPassword;
     private javax.swing.JButton jbKelolaUser;
     private javax.swing.JLabel jlAppName;
     private javax.swing.JLabel lTotalHarga;
