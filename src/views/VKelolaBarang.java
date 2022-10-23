@@ -182,8 +182,10 @@ public class VKelolaBarang extends javax.swing.JFrame {
                 obj[0] = rs.getString("kode");
                 obj[1] = rs.getString("nama");
                 obj[2] = rs.getString("satuan");
-                obj[3] = rs.getString("harga_beli");
-                obj[4] = rs.getString("harga_jual");
+                obj[3] = String.format(vKasir.getAppLocale(), "%,.0f",
+                            Double.parseDouble(rs.getString("harga_beli")));
+                obj[4] = String.format(vKasir.getAppLocale(), "%,.0f",
+                            Double.parseDouble(rs.getString("harga_jual")));
                 obj[5] = rs.getString("id");
 
                 model.addRow(obj);

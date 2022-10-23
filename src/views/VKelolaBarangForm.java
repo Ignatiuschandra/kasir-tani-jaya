@@ -259,8 +259,6 @@ public class VKelolaBarangForm extends javax.swing.JFrame {
                 java.sql.Connection conn = vKasir.getDBConn();
                 java.sql.PreparedStatement pst = conn.prepareStatement(sql);
                 pst.execute();
-
-                JOptionPane.showMessageDialog(null, "Berhasil disimpan");
             } else {
                 java.sql.Connection conn = vKasir.getDBConn();
                 java.sql.PreparedStatement ps = conn.prepareStatement("UPDATE "
@@ -274,6 +272,9 @@ public class VKelolaBarangForm extends javax.swing.JFrame {
                 );
                 ps.executeUpdate();
             }
+            
+            this.setVisible(false);
+            JOptionPane.showMessageDialog(null, "Berhasil disimpan");
 
             tfNamaBarang.setText("");
             tfHargaBeli.setText("");

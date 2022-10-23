@@ -13,6 +13,8 @@ import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -88,6 +90,28 @@ public class VLoginForm extends javax.swing.JFrame {
         jlLogo.setIcon(imageIcon);
 
 //        tfTotal.addActionListener(tfEnterKey);
+        
+//        event enter
+        jpfPassword.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+                    try {
+                        login();
+                    } catch (Exception ex) {
+                        System.out.println("Ex log " + ex.getMessage());
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -130,7 +154,6 @@ public class VLoginForm extends javax.swing.JFrame {
         jLabel1.setText("Username");
 
         tfUsername.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        tfUsername.setText("admin");
         tfUsername.setMinimumSize(new java.awt.Dimension(60, 21));
         tfUsername.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -154,7 +177,11 @@ public class VLoginForm extends javax.swing.JFrame {
             }
         });
 
-        jpfPassword.setText("admin2o2z");
+        jpfPassword.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jpfPasswordActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -214,6 +241,10 @@ public class VLoginForm extends javax.swing.JFrame {
 
     private void jbTombolActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbTombolActionPerformed
         // TODO add your handling code here:
+        login();
+    }//GEN-LAST:event_jbTombolActionPerformed
+    
+    private void login(){
         String uname = tfUsername.getText();
         String passwd = new String(jpfPassword.getPassword());
         String encryptedPasswd
@@ -254,9 +285,7 @@ public class VLoginForm extends javax.swing.JFrame {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
-
-    }//GEN-LAST:event_jbTombolActionPerformed
-
+    }
     private void jbTombolMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jbTombolMouseClicked
         // TODO add your handling code here:
     }//GEN-LAST:event_jbTombolMouseClicked
@@ -264,6 +293,10 @@ public class VLoginForm extends javax.swing.JFrame {
     private void tfUsernameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tfUsernameActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_tfUsernameActionPerformed
+
+    private void jpfPasswordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jpfPasswordActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jpfPasswordActionPerformed
 
     public void setTfNamaBarang(String text) {
         tfUsername.setText(text);

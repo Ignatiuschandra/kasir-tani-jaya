@@ -238,7 +238,7 @@ public class VKelolaHutangForm extends javax.swing.JFrame {
             }
 
             if (uangDiserahkan >= hutangJml) {
-                isLunas = "1";
+                isLunas = "0";
             }
         } catch (SQLException ex) {
             ex.printStackTrace();

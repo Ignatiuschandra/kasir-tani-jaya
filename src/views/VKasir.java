@@ -232,7 +232,29 @@ public class VKasir extends javax.swing.JFrame {
             @Override
             public void keyReleased(KeyEvent event) {
                 int diserahkan = Integer.parseInt(tfDiserahkan.getText());
-                int kembalian = diserahkan - totalHarga;
+                int potongan = Integer.parseInt(tfPotongan.getText());
+                int kembalian = diserahkan - (totalHarga - potongan);
+                tfKembalian.setText(Integer.toString(kembalian));
+            }
+
+            @Override
+            public void keyTyped(KeyEvent event) {
+
+            }
+        });
+        
+        tfPotongan.addFocusListener(new FocusTextField(tfPotongan));
+        tfPotongan.addKeyListener(new KeyListener() {
+            @Override
+            public void keyPressed(KeyEvent event) {
+
+            }
+
+            @Override
+            public void keyReleased(KeyEvent event) {
+                int diserahkan = Integer.parseInt(tfDiserahkan.getText());
+                int potongan = Integer.parseInt(tfPotongan.getText());
+                int kembalian = diserahkan - (totalHarga - potongan);
                 tfKembalian.setText(Integer.toString(kembalian));
             }
 
@@ -602,6 +624,11 @@ public class VKasir extends javax.swing.JFrame {
 
         tfDiserahkan.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         tfDiserahkan.setText("0");
+        tfDiserahkan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                tfDiserahkanActionPerformed(evt);
+            }
+        });
 
         jLabel6.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel6.setText("KEMBALIAN (Rp.)");
@@ -967,6 +994,10 @@ public class VKasir extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jbGantiPasswordActionPerformed
 
+    private void tfDiserahkanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tfDiserahkanActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_tfDiserahkanActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1047,6 +1078,7 @@ public class VKasir extends javax.swing.JFrame {
             dtmModel.setValueAt(subtotal, i, 5);
             total += subtotal;
         }
+        total -= Integer.parseInt(tfPotongan.getText().toString());
 
         totalHarga = total;
         lTotalHarga.setText("Rp. " + Integer.toString(totalHarga));

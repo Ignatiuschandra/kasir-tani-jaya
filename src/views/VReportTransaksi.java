@@ -5,6 +5,7 @@
  */
 package views;
 
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
@@ -17,6 +18,8 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -117,12 +120,12 @@ public class VReportTransaksi extends javax.swing.JFrame {
         model.addColumn("PARTISIPAN");
         model.addColumn("PENGELUARAN (Rp.)");
         model.addColumn("PEMASUKAN (Rp.)");
-        model.addColumn("MASIH HUTANG");
+//        model.addColumn("MASIH HUTANG");
         model.addColumn("ACTION");
 
-        jtBarang.getColumnModel().getColumn(5).setMinWidth(0);
-        jtBarang.getColumnModel().getColumn(5).setMaxWidth(0);
-        jtBarang.getColumnModel().getColumn(5).setWidth(0);
+        jtBarang.getColumnModel().getColumn(4).setMinWidth(0);
+        jtBarang.getColumnModel().getColumn(4).setMaxWidth(0);
+        jtBarang.getColumnModel().getColumn(4).setWidth(0);
 
 //        set align
         DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
@@ -131,7 +134,7 @@ public class VReportTransaksi extends javax.swing.JFrame {
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
         jtBarang.getColumnModel().getColumn(2).setCellRenderer(rightRenderer);
         jtBarang.getColumnModel().getColumn(3).setCellRenderer(rightRenderer);
-        jtBarang.getColumnModel().getColumn(4).setCellRenderer(centerRenderer);
+//        jtBarang.getColumnModel().getColumn(4).setCellRenderer(centerRenderer);
 //        getData("");
 
 //        set event ke search bar
@@ -217,6 +220,44 @@ public class VReportTransaksi extends javax.swing.JFrame {
                 }
             }
         });
+
+        jcbFilter.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    getData("");
+                } catch (ParseException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+
+        jcbFilter.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String val = jcbFilter.getSelectedItem().toString();
+                CardLayout card = (CardLayout) jPanel1.getLayout();
+
+                if (val.equalsIgnoreCase("Perhari")) {
+                    card.show(jPanel1, "jpTanggal");
+                } else {
+                    card.show(jPanel1, "jpBulan");
+                }
+            }
+        });
+
+        Date date = new Date();
+        jdcTanggal.setDate(date);
+
+        jdcTanggal.getDateEditor().addPropertyChangeListener(
+            new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent e) {
+                try {
+                    getData("");
+                } catch (ParseException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
     }
 
     public void getData(String keyword) throws ParseException {
@@ -227,30 +268,63 @@ public class VReportTransaksi extends javax.swing.JFrame {
         try {
             java.sql.ResultSet rs;
             java.sql.Connection conn = vKasir.getDBConn();
-            java.sql.PreparedStatement ps = conn.prepareStatement("(SELECT "
-                    + "id, pelanggan, total, is_hutang, created_at,"
-                    + " uang_diserahkan, '1' as is_pemasukan"
-                    + " FROM transaksi"
-                    + " WHERE MONTH(created_at) = " + this.currMonth + " "
-                    + " AND YEAR(created_at) = '" + this.currYear + "')"
-                    + "UNION"
-                    + "(SELECT "
-                    + "pengeluaran.id, nama as pelanggan, total,"
-                    + " '0' as is_hutang, tgl_transaksi as created_at,"
-                    + " '0' as uang_diserahkan, '0' as is_pemasukan"
-                    + " FROM pengeluaran"
-                    + " LEFT JOIN user ON user_id = user.id"
-                    + " WHERE MONTH(tgl_transaksi) = " + this.currMonth + " "
-                    + " AND YEAR(tgl_transaksi) = '" + this.currYear + "')"
-                    + " ORDER BY created_at DESC"
-            );
+
+            String query;
+
+            if (jcbFilter.getSelectedItem().toString().equalsIgnoreCase("Perbulan")) {
+                query = "(SELECT "
+                        + "id, pelanggan, total, is_hutang, created_at,"
+                        + " uang_diserahkan, '1' as is_pemasukan, potongan"
+                        + " FROM transaksi"
+                        + " WHERE is_hutang = '0'"
+                        + " AND MONTH(created_at) = " + this.currMonth + " "
+                        + " AND YEAR(created_at) = '" + this.currYear + "'"
+                        + " AND pelanggan LIKE '%" + keyword + "%')"
+                        + " UNION "
+                        + "(SELECT "
+                        + "pengeluaran.id, nama as pelanggan, total,"
+                        + " '0' as is_hutang, tgl_transaksi as created_at,"
+                        + " '0' as uang_diserahkan, '0' as is_pemasukan, "
+                        + " '0' as potongan"
+                        + " FROM pengeluaran"
+                        + " LEFT JOIN user ON user_id = user.id"
+                        + " WHERE MONTH(tgl_transaksi) = " + this.currMonth + " "
+                        + " AND YEAR(tgl_transaksi) = '" + this.currYear + "'"
+                        + " AND nama LIKE '%" + keyword + "%')"
+                        + " ORDER BY created_at DESC";
+            } else {
+                SimpleDateFormat dcn = new SimpleDateFormat("yyyy-MM-dd");
+                String tgl_transaksi = dcn.format(jdcTanggal.getDate());
+                query = "(SELECT "
+                        + "id, pelanggan, total, is_hutang, created_at,"
+                        + " uang_diserahkan, '1' as is_pemasukan, potongan"
+                        + " FROM transaksi"
+                        + " WHERE is_hutang = '0'"
+                        + " AND DATE(created_at) = '" + tgl_transaksi + "' "
+                        + " AND pelanggan LIKE '%" + keyword + "%')"
+                        + " UNION "
+                        + "(SELECT "
+                        + "pengeluaran.id, nama as pelanggan, total,"
+                        + " '0' as is_hutang, tgl_transaksi as created_at,"
+                        + " '0' as uang_diserahkan, '0' as is_pemasukan, "
+                        + " '0' as potongan"
+                        + " FROM pengeluaran"
+                        + " LEFT JOIN user ON user_id = user.id"
+                        + " WHERE tgl_transaksi = '" + tgl_transaksi + "' "
+                        + " AND nama LIKE '%" + keyword + "%')"
+                        + " ORDER BY created_at DESC";
+            }
+
+            java.sql.PreparedStatement ps = conn.prepareStatement(query);
             rs = ps.executeQuery();
 
             models.ItemBarang ib;
             Double pemasukan = 0.0;
             Double pengeluaran = 0.0;
+            boolean isAdaRow = false;
 
             while (rs.next()) {
+                isAdaRow = true;
                 Object[] obj = new Object[6];
                 String oldstring = rs.getString("created_at");
                 Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
@@ -266,10 +340,12 @@ public class VReportTransaksi extends javax.swing.JFrame {
                             Double.parseDouble(rs.getString("total")));
                     obj[3] = "0";
                 } else {
-                    pemasukan += Double.parseDouble(rs.getString("total"));
+                    pemasukan += Double.parseDouble(rs.getString("total"))
+                            - Double.parseDouble(rs.getString("potongan"));
                     obj[2] = "0";
                     obj[3] = String.format(vKasir.getAppLocale(), "%,.0f",
-                            Double.parseDouble(rs.getString("total")));
+                            Double.parseDouble(rs.getString("total"))
+                            - Double.parseDouble(rs.getString("potongan")));
                 }
 
                 String hutang = "TIDAK";
@@ -277,19 +353,20 @@ public class VReportTransaksi extends javax.swing.JFrame {
                 if (rs.getString("is_hutang").equalsIgnoreCase("1")) {
                     hutang = "YA ";
                     String hutangJml = String.format(vKasir.getAppLocale(), "%,.0f",
-                            Double.parseDouble(rs.getString("total"))
-                            - Double.parseDouble(rs.getString("uang_diserahkan")));;
+                            (Double.parseDouble(rs.getString("total"))
+                            - Double.parseDouble(rs.getString("potongan")))
+                            - Double.parseDouble(rs.getString("uang_diserahkan")));
 
                     hutang += "(" + hutangJml + ")";
                 }
 
-                obj[4] = hutang;
-                obj[5] = rs.getString("id");
+//                obj[4] = hutang;
+                obj[4] = rs.getString("id");
 
                 model.addRow(obj);
             }
 
-            if (pengeluaran != 0.0 && pemasukan != 0.0) {
+            if (isAdaRow) {
                 Object[] obj = new Object[6];
                 obj[1] = "Total Transaksi (Rp.)";
                 obj[2] = String.format(vKasir.getAppLocale(), "%,.0f", pengeluaran);
@@ -325,9 +402,14 @@ public class VReportTransaksi extends javax.swing.JFrame {
         jtBarang = new javax.swing.JTable();
         jSearch = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
+        jbCetak = new javax.swing.JButton();
+        jPanel1 = new javax.swing.JPanel();
+        jpBulan = new javax.swing.JPanel();
         cbBulan = new javax.swing.JComboBox<>();
         cbTahun = new javax.swing.JComboBox<>();
-        jbCetak = new javax.swing.JButton();
+        jpTanggal = new javax.swing.JPanel();
+        jdcTanggal = new com.toedter.calendar.JDateChooser();
+        jcbFilter = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
@@ -357,12 +439,14 @@ public class VReportTransaksi extends javax.swing.JFrame {
         ));
         jScrollPane1.setViewportView(jtBarang);
 
+        jSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jSearchActionPerformed(evt);
+            }
+        });
+
         jLabel8.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         jLabel8.setText("Search");
-
-        cbBulan.setMaximumSize(new java.awt.Dimension(49, 22));
-
-        cbTahun.setMaximumSize(new java.awt.Dimension(49, 22));
 
         jbCetak.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         jbCetak.setText("EXCEL");
@@ -377,6 +461,62 @@ public class VReportTransaksi extends javax.swing.JFrame {
             }
         });
 
+        jPanel1.setBackground(new java.awt.Color(204, 204, 204));
+        jPanel1.setLayout(new java.awt.CardLayout());
+
+        jpBulan.setBackground(new java.awt.Color(204, 204, 204));
+
+        cbBulan.setMaximumSize(new java.awt.Dimension(49, 22));
+
+        cbTahun.setMaximumSize(new java.awt.Dimension(49, 22));
+
+        javax.swing.GroupLayout jpBulanLayout = new javax.swing.GroupLayout(jpBulan);
+        jpBulan.setLayout(jpBulanLayout);
+        jpBulanLayout.setHorizontalGroup(
+            jpBulanLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jpBulanLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(cbBulan, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(cbTahun, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(15, Short.MAX_VALUE))
+        );
+        jpBulanLayout.setVerticalGroup(
+            jpBulanLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jpBulanLayout.createSequentialGroup()
+                .addGroup(jpBulanLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cbBulan, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cbTahun, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(0, 0, Short.MAX_VALUE))
+        );
+
+        jPanel1.add(jpBulan, "jpBulan");
+
+        jpTanggal.setBackground(new java.awt.Color(204, 204, 204));
+
+        javax.swing.GroupLayout jpTanggalLayout = new javax.swing.GroupLayout(jpTanggal);
+        jpTanggal.setLayout(jpTanggalLayout);
+        jpTanggalLayout.setHorizontalGroup(
+            jpTanggalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jpTanggalLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jdcTanggal, javax.swing.GroupLayout.PREFERRED_SIZE, 147, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(100, Short.MAX_VALUE))
+        );
+        jpTanggalLayout.setVerticalGroup(
+            jpTanggalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jdcTanggal, javax.swing.GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
+        );
+
+        jPanel1.add(jpTanggal, "jpTanggal");
+
+        jcbFilter.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Perbulan", "Perhari" }));
+        jcbFilter.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jcbFilterActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -388,30 +528,37 @@ public class VReportTransaksi extends javax.swing.JFrame {
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 720, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(cbBulan, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cbTahun, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jbCetak, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jcbFilter, javax.swing.GroupLayout.PREFERRED_SIZE, 145, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jbCetak, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel8)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
+            .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel3Layout.createSequentialGroup()
+                    .addGap(176, 176, 176)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 253, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(303, Short.MAX_VALUE)))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jSearch)
                     .addComponent(jLabel8)
-                    .addComponent(cbBulan, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cbTahun, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jbCetak))
-                .addGap(9, 9, 9)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 377, Short.MAX_VALUE)
-                .addContainerGap())
+                    .addComponent(jbCetak, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jcbFilter))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 411, Short.MAX_VALUE)
+                .addGap(9, 9, 9))
+            .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel3Layout.createSequentialGroup()
+                    .addContainerGap()
+                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(392, Short.MAX_VALUE)))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -442,10 +589,21 @@ public class VReportTransaksi extends javax.swing.JFrame {
         excelFileChooser.setDialogTitle("Simpan Sebagai");
         FileNameExtensionFilter fnef
                 = new FileNameExtensionFilter("EXCEL FILES", "xls", "xlsx");
-
+        
+        String fileName;
+        String appName = vKasir.getAppConfig().getConfig("APP_NAME");
+        if (jcbFilter.getSelectedItem().toString()
+                .equalsIgnoreCase("Perbulan")) {
+            fileName = "Report-"+appName+"-"
+                        + currYear + "-" + String.format("%02d", currMonth);
+        }else{
+            SimpleDateFormat dcn = new SimpleDateFormat("yyyy-MM-dd");
+            String tgl_transaksi = dcn.format(jdcTanggal.getDate());
+            fileName = "Report-"+appName+"-"+ tgl_transaksi;
+        }
+        
         excelFileChooser.setSelectedFile(
-                new File("Report-Warung Satwa-"
-                        + String.format("%02d", currMonth) + "-" + currYear));
+                new File(fileName));
         excelFileChooser.setFileFilter(fnef);
         int excelChooser = excelFileChooser.showSaveDialog(null);
 
@@ -465,13 +623,13 @@ public class VReportTransaksi extends javax.swing.JFrame {
             excelRowHeader.createCell(2).setCellValue("PARTISIPAN");
             excelRowHeader.createCell(3).setCellValue("PENGELUARAN");
             excelRowHeader.createCell(4).setCellValue("PEMASUKAN");
-            excelRowHeader.createCell(5).setCellValue("HUTANG");
+//            excelRowHeader.createCell(5).setCellValue("HUTANG");
 
-            for (int i = 1; i < model.getRowCount()-2 + 1; i++) { // kurang 2 untuk bansi net profit
+            for (int i = 1; i < model.getRowCount() - 2 + 1; i++) { // kurang 2 untuk bansi net profit
                 XSSFRow excelRow = excelSheet.createRow(i);
                 for (int j = 0; j < model.getColumnCount(); j++) {
                     int imin1 = i - 1;
-                    excelRow.createCell(0).setCellValue(model.getValueAt(imin1, 5).toString());
+                    excelRow.createCell(0).setCellValue(model.getValueAt(imin1, 4).toString());
                     excelRow.createCell(1).setCellValue(model.getValueAt(imin1, 0).toString());
                     excelRow.createCell(2).setCellValue(model.getValueAt(imin1, 1).toString());
                     excelRow.createCell(3).setCellValue(
@@ -480,7 +638,7 @@ public class VReportTransaksi extends javax.swing.JFrame {
                     excelRow.createCell(4).setCellValue(
                             Integer.parseInt(model.getValueAt(imin1, 3)
                                     .toString().replace(".", "")));
-                    excelRow.createCell(5).setCellValue(model.getValueAt(imin1, 4).toString());
+//                    excelRow.createCell(5).setCellValue(model.getValueAt(imin1, 4).toString());
                 }
             }
 
@@ -511,6 +669,14 @@ public class VReportTransaksi extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_jbCetakActionPerformed
+
+    private void jSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jSearchActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jSearchActionPerformed
+
+    private void jcbFilterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jcbFilterActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jcbFilterActionPerformed
 
 //    method delete
     private void deleteData() throws ParseException {
@@ -590,11 +756,16 @@ public class VReportTransaksi extends javax.swing.JFrame {
     private javax.swing.JComboBox<models.StandardItem> cbBulan;
     private javax.swing.JComboBox<models.StandardItem> cbTahun;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextField jSearch;
     private javax.swing.JButton jbCetak;
+    private javax.swing.JComboBox<String> jcbFilter;
+    private com.toedter.calendar.JDateChooser jdcTanggal;
+    private javax.swing.JPanel jpBulan;
+    private javax.swing.JPanel jpTanggal;
     private javax.swing.JTable jtBarang;
     // End of variables declaration//GEN-END:variables
 }
