@@ -273,13 +273,16 @@ public class VReportTransaksi extends javax.swing.JFrame {
 
             if (jcbFilter.getSelectedItem().toString().equalsIgnoreCase("Perbulan")) {
                 query = "(SELECT "
-                        + "id, pelanggan, total, is_hutang, created_at,"
+                        + "transaksi.id, transaksi.pelanggan, "
+                        + " SUM(transaksi_detail.harga_jual - transaksi_detail.harga_beli) as total, "
+                        + " transaksi.is_hutang, transaksi.created_at,"
                         + " uang_diserahkan, '1' as is_pemasukan, potongan"
                         + " FROM transaksi"
+                        + " JOIN transaksi_detail ON transaksi.id = transaksi_detail.transaksi_id"
                         + " WHERE is_hutang = '0'"
-                        + " AND MONTH(created_at) = " + this.currMonth + " "
-                        + " AND YEAR(created_at) = '" + this.currYear + "'"
-                        + " AND pelanggan LIKE '%" + keyword + "%')"
+                        + " AND MONTH(transaksi.created_at) = " + this.currMonth + " "
+                        + " AND YEAR(transaksi.created_at) = '" + this.currYear + "'"
+                        + " AND pelanggan LIKE '%" + keyword + "%' GROUP BY transaksi.id)"
                         + " UNION "
                         + "(SELECT "
                         + "pengeluaran.id, nama as pelanggan, total,"
@@ -296,12 +299,13 @@ public class VReportTransaksi extends javax.swing.JFrame {
                 SimpleDateFormat dcn = new SimpleDateFormat("yyyy-MM-dd");
                 String tgl_transaksi = dcn.format(jdcTanggal.getDate());
                 query = "(SELECT "
-                        + "id, pelanggan, total, is_hutang, created_at,"
+                        + "id, pelanggan, is_hutang, created_at,"
+                        + " SUM(transaksi_detail.harga_jual - transaksi_detail.harga_beli) as total, "
                         + " uang_diserahkan, '1' as is_pemasukan, potongan"
                         + " FROM transaksi"
                         + " WHERE is_hutang = '0'"
                         + " AND DATE(created_at) = '" + tgl_transaksi + "' "
-                        + " AND pelanggan LIKE '%" + keyword + "%')"
+                        + " AND pelanggan LIKE '%" + keyword + "%' GROUP BY transaksi.id)"
                         + " UNION "
                         + "(SELECT "
                         + "pengeluaran.id, nama as pelanggan, total,"
@@ -546,11 +550,11 @@ public class VReportTransaksi extends javax.swing.JFrame {
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jSearch)
-                    .addComponent(jLabel8)
-                    .addComponent(jbCetak, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jcbFilter))
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jSearch, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jbCetak, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jcbFilter, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel8))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 411, Short.MAX_VALUE)
                 .addGap(9, 9, 9))

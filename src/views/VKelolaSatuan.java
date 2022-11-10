@@ -39,7 +39,7 @@ import models.ItemBarang;
  *
  * @author Chandra
  */
-public class VKelolaBarang extends javax.swing.JFrame {
+public class VKelolaSatuan extends javax.swing.JFrame {
 
     /**
      * Creates new form VKasir
@@ -48,7 +48,7 @@ public class VKelolaBarang extends javax.swing.JFrame {
     private DefaultTableModel model;
     private String selectedRowId;
 
-    public VKelolaBarang() {
+    public VKelolaSatuan() {
         Toolkit kit = Toolkit.getDefaultToolkit();
         Image img = kit.createImage(vKasir.getLogo());
         setIconImage(img);
@@ -63,13 +63,13 @@ public class VKelolaBarang extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(VKelolaBarang.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(VKelolaSatuan.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(VKelolaBarang.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(VKelolaSatuan.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(VKelolaBarang.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(VKelolaSatuan.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(VKelolaBarang.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(VKelolaSatuan.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
 
         initComponents();
@@ -79,21 +79,17 @@ public class VKelolaBarang extends javax.swing.JFrame {
                 Color.decode(vKasir.getAppConfig().getConfig("APP_MAIN_COLOR")));
         
         this.setTitle(vKasir.getAppConfig()
-                .getConfig("APP_NAME")+" - Kelola Barang");
+                .getConfig("APP_NAME")+" - Kelola Satuan");
 
 //        table
         model = new DefaultTableModel();
         jtBarang.setModel(model);
-        model.addColumn("KODE");
-        model.addColumn("NAMA");
         model.addColumn("SATUAN");
-        model.addColumn("HARGA MODAL");
-        model.addColumn("HARGA JUAL");
         model.addColumn("ACTION");
 
-        jtBarang.getColumnModel().getColumn(5).setMinWidth(0);
-        jtBarang.getColumnModel().getColumn(5).setMaxWidth(0);
-        jtBarang.getColumnModel().getColumn(5).setWidth(0);
+        jtBarang.getColumnModel().getColumn(1).setMinWidth(0);
+        jtBarang.getColumnModel().getColumn(1).setMaxWidth(0);
+        jtBarang.getColumnModel().getColumn(1).setWidth(0);
 //        getData("");
 
 //        set event ke search bar
@@ -132,7 +128,7 @@ public class VKelolaBarang extends javax.swing.JFrame {
             @Override
             public void mousePressed(MouseEvent e) {
                 String selectedCellValue = (String) jtBarang.getValueAt(
-                        jtBarang.getSelectedRow(), 5);
+                        jtBarang.getSelectedRow(), 1);
                 System.out.println(selectedCellValue);
 
 //                set id selected
@@ -166,11 +162,10 @@ public class VKelolaBarang extends javax.swing.JFrame {
             java.sql.ResultSet rs;
             java.sql.Connection conn = vKasir.getDBConn();
             java.sql.PreparedStatement ps = conn.prepareStatement("SELECT "
-                    + "barang.id, kode, nama, satuan, harga_beli, harga_jual, satuan"
-                    + " FROM barang"
-                    + " LEFT JOIN satuan ON satuan.id = barang.satuan_id"
-                    + " WHERE (nama LIKE '%" + keyword + "%' "
-                    + " OR kode LIKE '%" + keyword + "%')"
+                    + "satuan.id, satuan.satuan"
+                    + " FROM satuan"
+                    + " WHERE (satuan LIKE '%" + keyword + "%' "
+                    + " OR satuan LIKE '%" + keyword + "%')"
                     + " AND deleted_at IS NULL "
             );
             rs = ps.executeQuery();
@@ -178,18 +173,11 @@ public class VKelolaBarang extends javax.swing.JFrame {
             models.ItemBarang ib;
 
             while (rs.next()) {
-                Object[] obj = new Object[6];
-                obj[0] = rs.getString("kode");
-                obj[1] = rs.getString("nama");
-                obj[2] = rs.getString("satuan");
-                obj[3] = String.format(vKasir.getAppLocale(), "%,.0f",
-                            Double.parseDouble(rs.getString("harga_beli")));
-                obj[4] = String.format(vKasir.getAppLocale(), "%,.0f",
-                            Double.parseDouble(rs.getString("harga_jual")));
-                obj[5] = rs.getString("id");
+                Object[] obj = new Object[2];
+                obj[0] = rs.getString("satuan");
+                obj[1] = rs.getString("id");
 
                 model.addRow(obj);
-                System.out.println(rs.getString("nama"));
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "ERROR load data " + e.getMessage());
@@ -247,7 +235,7 @@ public class VKelolaBarang extends javax.swing.JFrame {
         jLabel8.setText("Search");
 
         jButton2.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jButton2.setText("TAMBAH BARANG");
+        jButton2.setText("TAMBAH SATUAN");
         jButton2.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jButton2MouseClicked(evt);
@@ -342,7 +330,7 @@ public class VKelolaBarang extends javax.swing.JFrame {
 
     private void jButton2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton2MouseClicked
         // TODO add your handling code here:
-        VKelolaBarangForm formTambah = vKasir.getFormTambah();
+        VKelolaSatuanForm formTambah = vKasir.getKelolaSatuanForm();
         if (!formTambah.isVisible()) {
             formTambah.pack();
             formTambah.setLocationRelativeTo(null);
@@ -360,62 +348,40 @@ public class VKelolaBarang extends javax.swing.JFrame {
 
     private void jbEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbEditActionPerformed
         // TODO add your handling code here:
-        VKelolaBarangForm kelolaBarangForm = vKasir.getKelolaBarangForm();
-        if (!kelolaBarangForm.isVisible()) {
-            kelolaBarangForm.pack();
-            kelolaBarangForm.setLocationRelativeTo(null);
-            kelolaBarangForm.setVisible(true);
-            kelolaBarangForm.setDefaultCloseOperation(VKelolaBarangForm.DISPOSE_ON_CLOSE);
+        VKelolaSatuanForm kelolaSatuanForm = vKasir.getKelolaSatuanForm();
+        if (!kelolaSatuanForm.isVisible()) {
+            kelolaSatuanForm.pack();
+            kelolaSatuanForm.setLocationRelativeTo(null);
+            kelolaSatuanForm.setVisible(true);
+            kelolaSatuanForm.setDefaultCloseOperation(VKelolaBarangForm.DISPOSE_ON_CLOSE);
 
 //            set typenya jadi edit mode
-            kelolaBarangForm.setType(2);
+            kelolaSatuanForm.setType(2);
 
 //            get data
             try {
                 java.sql.ResultSet rs;
                 java.sql.Connection conn = vKasir.getDBConn();
                 java.sql.PreparedStatement ps = conn.prepareStatement("SELECT "
-                        + "barang.id, kode, nama, satuan, harga_beli, harga_jual, satuan"
-                        + " FROM barang"
-                        + " LEFT JOIN satuan ON satuan.id = barang.satuan_id"
-                        + " WHERE barang.id = " + this.selectedRowId + " "
-                        + " AND barang.deleted_at IS NULL "
+                        + "satuan.id, satuan"
+                        + " FROM satuan"
+                        + " WHERE satuan.id = " + this.selectedRowId + " "
+                        + " AND satuan.deleted_at IS NULL "
                 );
                 rs = ps.executeQuery();
 
                 while (rs.next()) {
                     models.ItemBarang ib;
 
-                    kelolaBarangForm.setTfNamaBarang(rs.getString("nama"));
-                    kelolaBarangForm.setTfKode(rs.getString("kode"));
-                    kelolaBarangForm.setTfNamaBarang(rs.getString("nama"));
-                    kelolaBarangForm.setTfHargaBeli(rs.getString("harga_beli"));
-                    kelolaBarangForm.setTfHargaJual(rs.getString("harga_jual"));
-
-//                get item
-                    java.sql.ResultSet iId;
-                    java.sql.PreparedStatement iIdPs = conn.prepareStatement("SELECT "
-                            + "id, satuan"
-                            + " FROM satuan"
-                            + " WHERE satuan = '" + rs.getString("satuan") + "' "
-                    );
-                    iId = iIdPs.executeQuery();
-                    
-                    if (iId.next()) {
-                        ItemBarang item
-                                = new models.ItemBarang(iId.getString(1), 
-                                        iId.getString(2));
-                        
-                        kelolaBarangForm.setCbSatuan(item);
-                    }
+                    kelolaSatuanForm.setTfNamaBarang(rs.getString("satuan"));
                 }
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(null, "ERROR load data " + e.getMessage());
             }
         }
         
-        kelolaBarangForm.toFront();
-        kelolaBarangForm.repaint();
+        kelolaSatuanForm.toFront();
+        kelolaSatuanForm.repaint();
     }//GEN-LAST:event_jbEditActionPerformed
 
     private void jbHapusMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jbHapusMouseClicked
@@ -435,7 +401,7 @@ public class VKelolaBarang extends javax.swing.JFrame {
     private void deleteData() {
         try {
             int n = JOptionPane.showConfirmDialog(
-                            null, "Apakah Anda yakin ingin menghapus data barang ini?",
+                            null, "Apakah Anda yakin ingin menghapus data satuan ini?",
                             "Hapus Barang",
                             JOptionPane.YES_NO_OPTION);
             
@@ -449,7 +415,7 @@ public class VKelolaBarang extends javax.swing.JFrame {
             } else {
                 java.sql.Connection conn = vKasir.getDBConn();
                 java.sql.PreparedStatement ps = conn.prepareStatement("UPDATE "
-                        + " barang"
+                        + " satuan"
                         + " SET deleted_at = NOW()"
                         + " WHERE id = '" + this.selectedRowId + "' "
                 );

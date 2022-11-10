@@ -25,6 +25,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -72,11 +73,13 @@ public class VKasir extends javax.swing.JFrame {
     static VKelolaUserForm vKelolaUserForm;
     static VKelolaPengeluaran vKelolaPengeluaran;
     static VKelolaPengeluaranForm vKelolaPengeluaranForm;
+    static VKelolaSatuan vKelolaSatuan;
+    static VKelolaSatuanForm vKelolaSatuanForm;
     static VGantiPassword vGantiPassword;
     static Connection conn;
     static Statement stm;
     private Map<String, String> map;
-    private String searchId;
+    private String searchId = null;
     private DefaultTableModel dtmModel;
     private static int totalHarga = 0;
     private static int kembalian = 0;
@@ -87,6 +90,9 @@ public class VKasir extends javax.swing.JFrame {
             .getSystemResource("main/resources/images/logo.png");
     private static ConfigManagement conf = new ConfigManagement();
     private static AuthEncryptor ae = new AuthEncryptor();
+    private static boolean justUpdate = false;
+    private static final DecimalFormat df = new DecimalFormat("0.0");
+    private static int selectedRow;
 
     private VKasir() {
         initComponents();
@@ -129,6 +135,13 @@ public class VKasir extends javax.swing.JFrame {
 
                         System.out.println(searchText);
                         updateSearch(searchText);
+                        
+//                        kalau searchId tidak kosong maka
+//                        insert value dari search ke table
+                        if(searchId != null){
+                            System.out.println("SI "+searchId);
+                            doTambah();
+                        }
                     } catch (Exception ex) {
                         System.out.println("Ex log " + ex.getMessage());
                     }
@@ -146,6 +159,7 @@ public class VKasir extends javax.swing.JFrame {
                     try {
                         String value = ((models.ItemBarang) item).getId();
                         searchId = value;
+                        System.out.println("SII ");
                     } catch (Exception ex) {
                         System.out.println("Log ex " + ex.getMessage());
                     }
@@ -197,15 +211,35 @@ public class VKasir extends javax.swing.JFrame {
         dtmModel.addTableModelListener(new TableModelListener() {
             @Override
             public void tableChanged(TableModelEvent tme) {
+                System.out.println("JU "+justUpdate);
                 if (tme.getType() == TableModelEvent.UPDATE
                         && tme.getColumn() == 4) { //QTY updated
-                    System.out.println("");
                     System.out.println("Cell " + tme.getFirstRow() + ", "
                             + tme.getColumn() + " changed. The new value: "
                             + dtmModel.getValueAt(tme.getFirstRow(),
                                     tme.getColumn()));
-
-                    updateTotalHarga();
+                    
+                    if(justUpdate){
+                        System.out.println("masuk");
+                        justUpdate = false;
+                        return;
+                    }
+                    
+                    justUpdate = true;
+                    System.out.println("4");
+                    updateSubTotal4();
+                }
+                
+                if (tme.getType() == TableModelEvent.UPDATE
+                        && tme.getColumn() == 5) { //Price updated
+                    if(justUpdate){
+                        System.out.println("masuk");
+                        justUpdate = false;
+                        return;
+                    }
+                    justUpdate = true;
+                    System.out.println("5");
+                    updateSubTotal5();
                 }
             }
 
@@ -312,6 +346,14 @@ public class VKasir extends javax.swing.JFrame {
     public VKelolaPengeluaranForm getKelolaPengeluaranForm() {
         return vKelolaPengeluaranForm;
     }
+    
+    public VKelolaSatuan getKelolaSatuan() {
+        return vKelolaSatuan;
+    }
+    
+    public VKelolaSatuanForm getKelolaSatuanForm() {
+        return vKelolaSatuanForm;
+    }
 
     public Connection getDBConn() {
         return conn;
@@ -324,7 +366,11 @@ public class VKasir extends javax.swing.JFrame {
     public void removeRow(int currentRow) {
         System.out.println(dtmModel.getRowCount());
         dtmModel.removeRow(currentRow);
-        this.updateTotalHarga();
+        this.updateTotal();
+    }
+    
+    public void setCurrentRow(int currentRow) {
+        this.selectedRow = currentRow;
     }
 
     public void setTotalHarga(int total) {
@@ -391,6 +437,7 @@ public class VKasir extends javax.swing.JFrame {
         jbKelolaUser = new javax.swing.JButton();
         jButton7 = new javax.swing.JButton();
         jbGantiPassword = new javax.swing.JButton();
+        jbKelolaSatuan = new javax.swing.JButton();
         jPanel5 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         bTambah = new javax.swing.JButton();
@@ -513,6 +560,14 @@ public class VKasir extends javax.swing.JFrame {
             }
         });
 
+        jbKelolaSatuan.setFont(new java.awt.Font("Tahoma", 1, 16)); // NOI18N
+        jbKelolaSatuan.setText("KELOLA SATUAN");
+        jbKelolaSatuan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbKelolaSatuanActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
@@ -526,7 +581,8 @@ public class VKasir extends javax.swing.JFrame {
                     .addComponent(jButton6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jbKelolaUser, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jButton7, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jbGantiPassword, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jbGantiPassword, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jbKelolaSatuan, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel4Layout.setVerticalGroup(
@@ -542,6 +598,8 @@ public class VKasir extends javax.swing.JFrame {
                 .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jbKelolaUser, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jbKelolaSatuan, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jbGantiPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -557,6 +615,11 @@ public class VKasir extends javax.swing.JFrame {
         bTambah.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 bTambahMouseClicked(evt);
+            }
+        });
+        bTambah.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bTambahActionPerformed(evt);
             }
         });
 
@@ -641,6 +704,11 @@ public class VKasir extends javax.swing.JFrame {
         bBayar.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 bBayarMouseClicked(evt);
+            }
+        });
+        bBayar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bBayarActionPerformed(evt);
             }
         });
 
@@ -772,7 +840,8 @@ public class VKasir extends javax.swing.JFrame {
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
-
+    
+//    button bayar act
     private void bBayarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bBayarMouseClicked
         // TODO add your handling code here:
         try {
@@ -802,7 +871,7 @@ public class VKasir extends javax.swing.JFrame {
                                 + "harga_beli, harga_jual) "
                                 + "VALUES ('" + idTrx
                                 + "', " + t.getValueAt(i, 7)
-                                + ", " + t.getValueAt(i, 4)
+                                + ", " + t.getValueAt(i, 4) 
                                 + ", " + t.getValueAt(i, 8)
                                 + ", " + t.getValueAt(i, 9) + ")");
 
@@ -826,9 +895,14 @@ public class VKasir extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "ERROR log " + e.getMessage());
         }
     }//GEN-LAST:event_bBayarMouseClicked
-
+    
+//    button tambah act
     private void bTambahMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bTambahMouseClicked
         // TODO add your handling code here:
+        doTambah();
+    }//GEN-LAST:event_bTambahMouseClicked
+
+    private void doTambah(){
         try {
             java.sql.ResultSet rs;
             java.sql.PreparedStatement ps
@@ -858,21 +932,27 @@ public class VKasir extends javax.swing.JFrame {
 //                System.out.println(totalHarga);
 //                lTotalHarga.setText("Rp. " + totalHarga);
                 System.out.println("hoho");
+                justUpdate = true;
                 dtmModel.addRow(obj);
             }
 
             System.out.println(dtmModel.getRowCount());
-
-            updateTotalHarga();
+            
+//            updateSubTotal4();
+            updateTotal();
 
             tKasir.getColumn("ACTION").setCellRenderer(new ButtonRenderer());
             tKasir.getColumn("ACTION").setCellEditor(new ButtonEditor(new JCheckBox()));
-
+            
+            cbSearch.getEditor().setItem("");
+            cbSearch.removeAllItems();
+            searchId = null;
+            
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "ERROR load barang " + e.getMessage());
         }
-    }//GEN-LAST:event_bTambahMouseClicked
-
+    }
+    
     private void jButton3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton3MouseClicked
         // TODO add your handling code here:
         if (!vKelolaBarang.isVisible()) {
@@ -884,6 +964,8 @@ public class VKasir extends javax.swing.JFrame {
             vKelolaBarang.setVisible(true);
         }
         vKelolaBarang.getData("");
+        vKelolaBarang.toFront();
+        vKelolaBarang.repaint();
     }//GEN-LAST:event_jButton3MouseClicked
 
     private void cbHutangActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbHutangActionPerformed
@@ -900,6 +982,10 @@ public class VKasir extends javax.swing.JFrame {
         } else {
             vReportTransaksi.setVisible(true);
         }
+        
+        vReportTransaksi.toFront();
+        vReportTransaksi.repaint();
+        
         try {
             vReportTransaksi.getData("");
         } catch (ParseException ex) {
@@ -917,6 +1003,10 @@ public class VKasir extends javax.swing.JFrame {
         } else {
             vKelolaHutang.setVisible(true);
         }
+        
+        vKelolaHutang.toFront();
+        vKelolaHutang.repaint();
+        
         try {
             vKelolaHutang.getData("");
         } catch (ParseException ex) {
@@ -958,6 +1048,10 @@ public class VKasir extends javax.swing.JFrame {
         } else {
             vKelolaUser.setVisible(true);
         }
+        
+        vKelolaUser.toFront();
+        vKelolaUser.repaint();
+        
         try {
             vKelolaUser.getData("");
         } catch (ParseException ex) {
@@ -975,6 +1069,10 @@ public class VKasir extends javax.swing.JFrame {
         } else {
             vKelolaPengeluaran.setVisible(true);
         }
+        
+        vKelolaPengeluaran.toFront();
+        vKelolaPengeluaran.repaint();
+        
         try {
             vKelolaPengeluaran.getData("");
         } catch (ParseException ex) {
@@ -992,11 +1090,37 @@ public class VKasir extends javax.swing.JFrame {
         } else {
             vGantiPassword.setVisible(true);
         }
+        
+        vGantiPassword.toFront();
+        vGantiPassword.repaint();
     }//GEN-LAST:event_jbGantiPasswordActionPerformed
 
     private void tfDiserahkanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tfDiserahkanActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_tfDiserahkanActionPerformed
+
+    private void bBayarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bBayarActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_bBayarActionPerformed
+
+    private void bTambahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bTambahActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_bTambahActionPerformed
+
+    private void jbKelolaSatuanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbKelolaSatuanActionPerformed
+        // TODO add your handling code here:
+        if (!vKelolaSatuan.isVisible()) {
+            vKelolaSatuan.pack();
+            vKelolaSatuan.setLocationRelativeTo(null);
+            vKelolaSatuan.setVisible(true);
+            vKelolaSatuan.setDefaultCloseOperation(VReportTransaksi.DISPOSE_ON_CLOSE);
+        } else {
+            vKelolaSatuan.setVisible(true);
+        }
+        vKelolaSatuan.getData("");
+        vKelolaSatuan.toFront();
+        vKelolaSatuan.repaint();
+    }//GEN-LAST:event_jbKelolaSatuanActionPerformed
 
     /**
      * @param args the command line arguments
@@ -1052,6 +1176,8 @@ public class VKasir extends javax.swing.JFrame {
         vKelolaPengeluaran = new VKelolaPengeluaran();
         vKelolaPengeluaranForm = new VKelolaPengeluaranForm(1);
         vGantiPassword = new VGantiPassword();
+        vKelolaSatuan = new VKelolaSatuan();
+        vKelolaSatuanForm = new VKelolaSatuanForm(1);
         
 //        System.out.println("how many : "+vKasir.getInstantiationCounter());
 
@@ -1067,21 +1193,50 @@ public class VKasir extends javax.swing.JFrame {
         });
     }
 
-    public void updateTotalHarga() {
+    public void updateSubTotal4() {
+        System.out.println("SR4 : " + tKasir.getSelectedRow());
+        int total = 0;
+//        for (int i = 0; i < size; i++) {
+            double subtotal = Double.parseDouble(dtmModel
+                    .getValueAt(tKasir.getSelectedRow(), 3).toString())
+                    * Double.parseDouble(dtmModel.getValueAt(
+                            tKasir.getSelectedRow(), 4).toString());
+            System.out.println(subtotal);
+            dtmModel.setValueAt(String.format(this.getAppLocale(), "%,.0f",
+                            subtotal), tKasir.getSelectedRow(), 5);
+            total += subtotal;
+//        }
+        this.updateTotal();
+    }
+    
+    public void updateSubTotal5() {
+        System.out.println("SR4 : " + tKasir.getSelectedRow());
+        int total = 0;
+//        for (int i = 0; i < size; i++) {
+            double satuan = Double.parseDouble(dtmModel.getValueAt(tKasir.getSelectedRow(), 5).toString())
+                    / Double.parseDouble(dtmModel.getValueAt(tKasir.getSelectedRow(), 3).toString());
+            System.out.println(satuan);
+            dtmModel.setValueAt(df.format(satuan), tKasir.getSelectedRow(), 4);
+            System.out.println("QTY" + dtmModel.getValueAt(tKasir.getSelectedRow(), 4).toString());
+            total += Integer.parseInt(dtmModel.getValueAt(tKasir.getSelectedRow(), 5).toString());
+//        }
+        totalHarga = total;
+        this.updateTotal();
+    }
+    
+    public void updateTotal() {
         int size = dtmModel.getRowCount();
         System.out.println("TH : " + size);
         int total = 0;
         for (int i = 0; i < size; i++) {
-            int subtotal = Integer.parseInt(dtmModel.getValueAt(i, 3).toString())
-                    * Integer.parseInt(dtmModel.getValueAt(i, 4).toString());
-            System.out.println(subtotal);
-            dtmModel.setValueAt(subtotal, i, 5);
-            total += subtotal;
+            total += Integer.parseInt(dtmModel.getValueAt(i, 5).toString()
+                    .replace(".", ""));
         }
         total -= Integer.parseInt(tfPotongan.getText().toString());
-
+        justUpdate = false;
         totalHarga = total;
-        lTotalHarga.setText("Rp. " + Integer.toString(totalHarga));
+        lTotalHarga.setText("Rp. " + String.format(this.getAppLocale(), "%,.0f",
+                            Double.parseDouble(Integer.toString(totalHarga))));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -1108,6 +1263,7 @@ public class VKasir extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel6;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton jbGantiPassword;
+    private javax.swing.JButton jbKelolaSatuan;
     private javax.swing.JButton jbKelolaUser;
     private javax.swing.JLabel jlAppName;
     private javax.swing.JLabel lTotalHarga;
@@ -1174,6 +1330,8 @@ class ButtonEditor extends DefaultCellEditor {
         button.setText(label);
         isPushed = true;
         currentRow = row;
+        VKasir kasirClass = VKasir.getInstance();
+        kasirClass.setCurrentRow(row);
 //        beDTM = (DefaultTableModel) table.getModel();
         return button;
     }
